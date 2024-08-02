@@ -1,4 +1,7 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:simple_budget/globals.dart';
+import 'package:simple_budget/themes/colors.dart';
 import 'package:simple_budget/widgets/tab/my_tab_bar.dart';
 
 class LoginPage extends StatefulWidget {
@@ -9,6 +12,8 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  final TextEditingController _dashboardIdController = TextEditingController();
+  
   late Future<bool> _getMe;
   late String _currentTab;
   final Map<String, String> _tab = {
@@ -24,6 +29,12 @@ class _LoginPageState extends State<LoginPage> {
     _currentTab = "L";
 
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _dashboardIdController.dispose();
+    super.dispose();
   }
 
   @override
@@ -46,6 +57,7 @@ class _LoginPageState extends State<LoginPage> {
 
   Widget _generateBody() {
     return Container(
+      color: MyColor.primaryColorDark,
       padding: const EdgeInsets.fromLTRB(40, 0, 40, 0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -61,7 +73,26 @@ class _LoginPageState extends State<LoginPage> {
             })
           ),
           const SizedBox(height: 10,),
-          _showForm(),
+          Container(
+            padding: const EdgeInsets.all(20),
+            height: 200,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: MyColor.primaryColor,
+              borderRadius: BorderRadius.circular(5),
+            ),
+            child: Center(
+              child: _showForm()
+            ),
+          ),
+          const SizedBox(height: 10,),
+          Text(
+            "simple budget - ${Globals.appVersion}",
+            style: const TextStyle(
+              color: MyColor.backgroundColorDark,
+              fontSize: 10,
+            ),
+          )
         ],
       ),
     );
@@ -83,7 +114,30 @@ class _LoginPageState extends State<LoginPage> {
 
   Widget _showViewForm() {
     // TODO: to do view form
-    return Text("View form");
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        const Text(
+          "DASHBOARD ID",
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 14,
+            color: Colors.white,
+          ),
+        ),
+        const SizedBox(height: 5,),
+        CupertinoTextField(
+          controller: _dashboardIdController,
+          decoration: BoxDecoration(
+            color: MyColor.backgroundColor,
+            borderRadius: BorderRadius.circular(25)
+          ),
+        ),
+        const Expanded(child: SizedBox(),),
+        Text("BUTTON"),
+      ],
+    );
   }
 
   Future<bool> _getUserMe() async {

@@ -68,7 +68,7 @@ class _MyTabBarState extends State<MyTabBar> {
               child: Text(
                 widget.tab[key] ?? '',
                 style: TextStyle(
-                  color: (key == _currentTab ? Colors.white : MyColor.textColor),
+                  color: Colors.white,
                   fontWeight: (key == _currentTab ? FontWeight.bold : FontWeight.normal),
                 ),
                 textAlign: TextAlign.center,
