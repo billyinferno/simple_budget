@@ -11,14 +11,13 @@ void main() async {
     WidgetsFlutterBinding.ensureInitialized();
 
     // after that we can run the init app
-    await Future.microtask(() {
+    await Future.microtask(() async {
       // prefer to be portrait and up
       SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
       // load the environment configuration
-      dotenv.load(fileName: "env/.dev.env");
-
-      // 
+      debugPrint("Load .env files");
+      await dotenv.load(fileName: "env/.dev.env"); 
     }).then((_) {
       // init finished
       debugPrint("💯 Initialization finished");
