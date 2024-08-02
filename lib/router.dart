@@ -41,13 +41,6 @@ class _RouterPageState extends State<RouterPage> {
           builder: (context, state) => const LoginPage(),
         ),
         GoRoute(
-          name: 'dashboard_no_id',
-          path: '/dashboard',
-          builder: (context, state) {
-            return const DashboardPage(id: 'empty');
-          },
-        ),
-        GoRoute(
           name: 'dashboard',
           path: '/dashboard/:id',
           builder: (context, state) {
