@@ -28,6 +28,7 @@ class _RouterPageState extends State<RouterPage> {
   final _router = 
     GoRouter(
       initialLocation: '/',
+      debugLogDiagnostics: true,
       routes: <RouteBase>[
         GoRoute(
           name: 'default',
@@ -40,17 +41,24 @@ class _RouterPageState extends State<RouterPage> {
           builder: (context, state) => const LoginPage(),
         ),
         GoRoute(
+          name: 'dashboard_no_id',
+          path: '/dashboard',
+          builder: (context, state) {
+            return const DashboardPage(id: 'empty');
+          },
+        ),
+        GoRoute(
           name: 'dashboard',
           path: '/dashboard/:id',
           builder: (context, state) {
+            debugPrint("here!");
             final String id = (state.pathParameters["id"] ?? '');
             if (id.isEmpty) {
               // TODO: show invalid ID dashboard
-              return const DashboardPage();
+              return const DashboardPage(id: 'empty',);
             }
             else {
-              // TODO: show the actual dashboard
-              return const DashboardPage();
+              return DashboardPage(id: id,);
             }
           },
           routes: <RouteBase>[
