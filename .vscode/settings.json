@@ -18,5 +18,6 @@
         "titleBar.inactiveBackground": "#00796b99",
         "titleBar.inactiveForeground": "#e7e7e799"
     },
-    "peacock.color": "#00796B"
+    "peacock.color": "#00796B",
+    "cmake.sourceDirectory": "E:/Project/simple_budget/windows/flutter"
 }
