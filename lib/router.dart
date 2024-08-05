@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:simple_budget/pages/dashboard.dart';
 import 'package:simple_budget/pages/dashboard/dashboard_add.dart';
 import 'package:simple_budget/pages/dashboard/dashboard_edit.dart';
+import 'package:simple_budget/pages/error/page_not_found.dart';
 import 'package:simple_budget/pages/login.dart';
 import 'package:simple_budget/pages/pin_input.dart';
 import 'package:simple_budget/themes/themes.dart';
@@ -79,6 +80,15 @@ class _RouterPageState extends State<RouterPage> {
           ],
         ),
       ],
+      errorBuilder: (context, state) {
+        debugPrint("AAAA ${state.fullPath}");
+        debugPrint("BBBB ${state.name}");
+        debugPrint("CCCC ${state.uri}");
+        return PageNotFound(
+          title: 'Page Not Found',
+          message: 'The "${state.uri}" page that you looking for is not found. Please us arrow to return back to the main page.',
+        );
+      },
     );
 
   @override

@@ -166,18 +166,50 @@ class _LoginPageState extends State<LoginPage> {
     return false;
   }
 
+  Future<bool> _checkPlanUID({required String uid}) async {
+    // TODO: to perform NET call for checking the UID
+    return true;
+  }
+
   Future<void> _validateDashboardID() async {
     String dashboardId = _dashboardIdController.text.toUpperCase();
     if (dashboardId.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         createSnackBar(
-          message: "Please fill dashboard ID"
+          message: "Please fill dashboard ID",
+          color: MyColor.primaryColor,
         )
       );
+      // stop processing
+      return;
     }
-    // TODO: call API to verify if the dashboard ID is correct or not?
+    
+    await _checkPlanUID(uid: dashboardId).then((result) {
+      if (result) {
+        _goToPINPage(uid: dashboardId);
+      }
+      else {
+        _showSnackBar(errorMessage: "Plan UID not found");
+      }
+    }).onError((error, stackTrace) {
+      Log.error(
+        message: "Error when call check plan UID",
+        error: error,
+        stackTrace: stackTrace,
+      );
+    },);
+  }
 
+  void _showSnackBar({required String errorMessage}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      createSnackBar(
+        message: errorMessage,
+      ),
+    );
+  }
+
+  void _goToPINPage({required String uid}) {
     // go to pin input page
-    context.go('/pin/$dashboardId');
+    context.go('/pin/$uid');
   }
 }

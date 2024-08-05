@@ -12,20 +12,18 @@ class DashboardPage extends StatefulWidget {
 }
 
 class _DashboardPageState extends State<DashboardPage> {
-  late String _dashboardId;
+  late String _planUid;
   
   @override
   void initState() {
     // get the dashboard id
-    _dashboardId = widget.id as String;
-    // TODO: remove once we create the page
-    debugPrint("Dashboard ID: $_dashboardId");
+    _planUid = widget.id as String;
 
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    return const Text("Dashboard");
+    return Text("Dashboard for $_planUid");
   }
 }
