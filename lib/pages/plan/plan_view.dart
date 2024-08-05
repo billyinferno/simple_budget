@@ -24,6 +24,6 @@ class _PlanViewPageState extends State<PlanViewPage> {
 
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return Text("Viewing plan $_planUid");
   }
 }
