@@ -2,13 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:simple_budget/pages/dashboard.dart';
-import 'package:simple_budget/pages/dashboard/dashboard_add.dart';
-import 'package:simple_budget/pages/dashboard/dashboard_edit.dart';
-import 'package:simple_budget/pages/error/page_not_found.dart';
-import 'package:simple_budget/pages/login.dart';
-import 'package:simple_budget/pages/pin_input.dart';
-import 'package:simple_budget/themes/themes.dart';
+import 'package:simple_budget/_index.g.dart';
 
 class MyCustomScrollBehavior extends MaterialScrollBehavior {
   // Override behavior methods and getters like dragDevices
@@ -53,37 +47,42 @@ class _RouterPageState extends State<RouterPage> {
         ),
         GoRoute(
           name: 'dashboard',
-          path: '/dashboard/:id',
+          path: '/dashboard',
           builder: (context, state) {
-            final String id = (state.pathParameters["id"] ?? '');
-            if (id.isEmpty) {
-              // TODO: show invalid ID dashboard
-              return const DashboardPage(id: 'empty',);
+            return const DashboardPage();
+          },
+        ),
+        GoRoute(
+          path: '/plan/:uid',
+          builder: (context, state) {
+            final String uid = (state.pathParameters["uid"] ?? '');
+            if (uid.isEmpty) {
+              return const PageNotFound(
+                title: "Plan UID Empty",
+                message: "The Plan UID is empty, please ensure to check and input the correct UID for the plan."
+              );
             }
             else {
-              return DashboardPage(id: id,);
+              return PlanViewPage(uid: uid,);
             }
           },
           routes: <RouteBase>[
             GoRoute(
               path: 'add',
               builder: (context, state) {
-                return const DashboardAddPage();
+                return const PlanAddPage();
               },
             ),
             GoRoute(
               path: 'edit',
               builder: (context, state) {
-                return const DashboardEditPage();
+                return const PlanEditPage();
               },
             ),
           ],
         ),
       ],
       errorBuilder: (context, state) {
-        debugPrint("AAAA ${state.fullPath}");
-        debugPrint("BBBB ${state.name}");
-        debugPrint("CCCC ${state.uri}");
         return PageNotFound(
           title: 'Page Not Found',
           message: 'The "${state.uri}" page that you looking for is not found. Please us arrow to return back to the main page.',

@@ -8,6 +8,8 @@ export './utils/_index.g.dart';
 export './widgets/_index.g.dart';
 // STORAGE
 export './storage/_index.g.dart';
+// PAGE
+export './pages/_index.g.dart';
 
 // OTHER FILES
 export './globals.dart';
