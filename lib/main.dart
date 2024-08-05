@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:simple_budget/router.dart';
+import 'package:simple_budget/_index.g.dart';
 
 void main() async {
   await runZonedGuarded(() async {
@@ -16,23 +16,33 @@ void main() async {
       SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
       // load the environment configuration
-      debugPrint("Load .env files");
+      Log.info(message: "📦 Load .env files");
       await dotenv.load(fileName: "env/.dev.env"); 
+
+      // initialize the local box
+      Log.info(message: "📦 Init box");
+      LocalStorage.init();
     }).then((_) {
       // init finished
-      debugPrint("💯 Initialization finished");
+      Log.success(message: "💯 Initialization finished");
 
       // run the application
+      Log.success(message: "💯 Run application");
       runApp(const MyApp());
     }).onError((error, stackTrace) {
-      debugPrint("Error when perform app init");
-      debugPrint("Error: ${error.toString()}");
-      debugPrintStack(stackTrace: stackTrace);
+      Log.error(
+        message: "❌ Error when perform app init",
+        error: error,
+        stackTrace: stackTrace
+      );
     },);
   },
   (error, stack) {
-    debugPrint("Error: ${error.toString()}");
-    debugPrintStack(stackTrace: stack);
+    Log.error(
+      message: "❌ Error on runZoneGoarded",
+      error: error,
+      stackTrace: stack,
+    );
   },);
 }
 

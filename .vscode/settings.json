@@ -4,7 +4,7 @@
         "activityBar.background": "#00ac98",
         "activityBar.foreground": "#e7e7e7",
         "activityBar.inactiveForeground": "#e7e7e799",
-        "activityBarBadge.background": "#D32F2F",
+        "activityBarBadge.background": "#a900bf",
         "activityBarBadge.foreground": "#e7e7e7",
         "commandCenter.border": "#e7e7e799",
         "sash.hoverBorder": "#00ac98",

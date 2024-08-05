@@ -1,8 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:simple_budget/globals.dart';
-import 'package:simple_budget/themes/colors.dart';
-import 'package:simple_budget/widgets/tab/my_tab_bar.dart';
+import 'package:go_router/go_router.dart';
+import 'package:simple_budget/_index.g.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -133,9 +132,31 @@ class _LoginPageState extends State<LoginPage> {
             color: MyColor.backgroundColor,
             borderRadius: BorderRadius.circular(25)
           ),
+          textAlign: TextAlign.center,
+          maxLength: 6,
+          maxLines: 1,
+          style: const TextStyle(
+            fontSize: 35,
+            fontWeight: FontWeight.bold,
+          ),
+          cursorColor: MyColor.primaryColorDark,
         ),
         const Expanded(child: SizedBox(),),
-        Text("BUTTON"),
+        MyButton(
+          color: MyColor.primaryColorDark,
+          child: const Center(
+            child: Text(
+              "VIEW",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          onTap: () async {
+            _validateDashboardID();
+          },
+        ),
       ],
     );
   }
@@ -143,5 +164,20 @@ class _LoginPageState extends State<LoginPage> {
   Future<bool> _getUserMe() async {
     // TODO: to change with api call
     return false;
+  }
+
+  Future<void> _validateDashboardID() async {
+    String dashboardId = _dashboardIdController.text.toUpperCase();
+    if (dashboardId.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        createSnackBar(
+          message: "Please fill dashboard ID"
+        )
+      );
+    }
+    // TODO: call API to verify if the dashboard ID is correct or not?
+
+    // go to pin input page
+    context.go('/pin/$dashboardId');
   }
 }

@@ -1,12 +1,12 @@
-import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:simple_budget/utils/log.dart';
 
 class LocalStorage {
   static Box<dynamic>? _box;
 
   static Future<void> init() async {
     if (_box == null) {
-      debugPrint("📦Initialize Local Storage");
+      Log.info(message: "📦Initialize Local Storage");
       await Hive.initFlutter();
 
       // create the box

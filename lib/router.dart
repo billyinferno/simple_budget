@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -5,6 +6,7 @@ import 'package:simple_budget/pages/dashboard.dart';
 import 'package:simple_budget/pages/dashboard/dashboard_add.dart';
 import 'package:simple_budget/pages/dashboard/dashboard_edit.dart';
 import 'package:simple_budget/pages/login.dart';
+import 'package:simple_budget/pages/pin_input.dart';
 import 'package:simple_budget/themes/themes.dart';
 
 class MyCustomScrollBehavior extends MaterialScrollBehavior {
@@ -28,7 +30,7 @@ class _RouterPageState extends State<RouterPage> {
   final _router = 
     GoRouter(
       initialLocation: '/',
-      debugLogDiagnostics: true,
+      debugLogDiagnostics: kDebugMode,
       routes: <RouteBase>[
         GoRoute(
           name: 'default',
@@ -41,10 +43,17 @@ class _RouterPageState extends State<RouterPage> {
           builder: (context, state) => const LoginPage(),
         ),
         GoRoute(
+          name: 'pin_input',
+          path: '/pin/:id',
+          builder: (context, state) {
+            final String id = (state.pathParameters["id"] ?? '');
+            return PinInputPage(id: id);
+          },
+        ),
+        GoRoute(
           name: 'dashboard',
           path: '/dashboard/:id',
           builder: (context, state) {
-            debugPrint("here!");
             final String id = (state.pathParameters["id"] ?? '');
             if (id.isEmpty) {
               // TODO: show invalid ID dashboard
