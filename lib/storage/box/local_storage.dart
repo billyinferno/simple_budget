@@ -6,7 +6,7 @@ class LocalStorage {
 
   static Future<void> init() async {
     if (_box == null) {
-      Log.info(message: "📦Initialize Local Storage");
+      Log.info(message: "📦 Initialize Local Storage");
       await Hive.initFlutter();
 
       // create the box

@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:simple_budget/_index.g.dart';
+import 'package:simple_budget/pages/user.dart';
 
 class RouterPage extends StatefulWidget {
   const RouterPage({super.key});
@@ -38,6 +39,13 @@ class _RouterPageState extends State<RouterPage> {
         path: '/dashboard',
         builder: (context, state) {
           return const DashboardPage();
+        },
+      ),
+      GoRoute(
+        name: 'user',
+        path: '/user',
+        builder: (context, state) {
+          return const UserPage();
         },
       ),
       GoRoute(

@@ -143,7 +143,7 @@ class _PinInputPageState extends State<PinInputPage> {
           if (pinData.length == 6) {
             // this is means the pin data already 6
             // TODO: perform API call to verify the PIN
-            context.go('/dashboard/${widget.id}');
+            context.go('/plan/${widget.id}');
           }
         }
       }),
