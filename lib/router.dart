@@ -64,15 +64,10 @@ class _RouterPageState extends State<RouterPage> {
         },
         routes: <RouteBase>[
           GoRoute(
-            path: 'add',
+            path: 'item/:date',
             builder: (context, state) {
-              return const PlanAddPage();
-            },
-          ),
-          GoRoute(
-            path: 'edit',
-            builder: (context, state) {
-              return const PlanEditPage();
+              final String date = (state.pathParameters["date"] ?? '');
+              return const PlanItemPage();
             },
           ),
         ],

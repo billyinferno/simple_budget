@@ -11,10 +11,18 @@ class MyBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: (padding ?? const EdgeInsets.fromLTRB(10, 0, 10, 80)),
-      child: child,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: <Widget>[
+        Expanded(
+          child: Container(
+            width: double.infinity,
+            padding: (padding ?? const EdgeInsets.fromLTRB(10, 0, 10, 80)),
+            child: child,
+          ),
+        ),
+      ],
     );
   }
 }
