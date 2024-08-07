@@ -4,7 +4,6 @@ import 'package:simple_budget/_index.g.dart';
 
 class PlanAPI {
   static Future<PinVerifyModel> verifyPIN({required String uid, required String pin}) async {
-    Log.info(message: Globals.apiPinVerify);
     final String body = await NetUtils.post(
       url: Globals.apiPinVerify,
       body: {
