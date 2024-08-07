@@ -3,20 +3,20 @@ import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:go_router/go_router.dart';
 import 'package:simple_budget/_index.g.dart';
 
-class PageNotFound extends StatefulWidget {
+class ErrorTemplatePage extends StatefulWidget {
   final String title;
   final String message;
-  const PageNotFound({
+  const ErrorTemplatePage({
     super.key,
     required this.title,
     required this.message,
   });
 
   @override
-  State<PageNotFound> createState() => _PageNotFoundState();
+  State<ErrorTemplatePage> createState() => _ErrorTemplatePageState();
 }
 
-class _PageNotFoundState extends State<PageNotFound> {
+class _ErrorTemplatePageState extends State<ErrorTemplatePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(

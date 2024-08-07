@@ -1,9 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
-import 'package:simple_budget/utils/net/helper/netutil_exception.dart';
-import 'package:simple_budget/utils/net/netutil_global.dart';
-import 'package:simple_budget/utils/net/helper/netutil_type.dart';
+import 'package:simple_budget/_index.g.dart';
 
 class NetUtils {
   static String? bearerToken;
@@ -122,6 +120,7 @@ class NetUtils {
     ).timeout(
       const Duration(seconds: NetutilGlobal.apiTimeOut),
       onTimeout: () {
+        Log.error(message: 'Gateway timeout for $url');
         throw NetException(
           code: 504,
           type: NetType.post,
@@ -136,6 +135,9 @@ class NetUtils {
     }
 
     // status code is not 200, means we got error
+    Log.error(
+      message: '[${response.statusCode}] ${response.reasonPhrase ?? ''} -> ${response.body}'
+    );
     throw NetException(
       code: response.statusCode,
       type: NetType.post,
@@ -167,6 +169,7 @@ class NetUtils {
     ).timeout(
       const Duration(seconds: NetutilGlobal.apiTimeOut),
       onTimeout: () {
+        Log.error(message: 'Gateway timeout for $url');
         throw NetException(
           code: 504,
           type: NetType.delete,
@@ -181,6 +184,9 @@ class NetUtils {
     }
 
     // status code is not 200, means we got error
+    Log.error(
+      message: '[${response.statusCode}] ${response.reasonPhrase ?? ''} -> ${response.body}'
+    );
     throw NetException(
       code: response.statusCode,
       type: NetType.delete,
@@ -218,6 +224,7 @@ class NetUtils {
     ).timeout(
       const Duration(seconds: NetutilGlobal.apiTimeOut),
       onTimeout: () {
+        Log.error(message: 'Gateway timeout for $url');
         throw NetException(
           code: 504,
           type: NetType.patch,
@@ -232,6 +239,9 @@ class NetUtils {
     }
 
     // status code is not 200, means we got error
+    Log.error(
+      message: '[${response.statusCode}] ${response.reasonPhrase ?? ''} -> ${response.body}'
+    );
     throw NetException(
       code: response.statusCode,
       type: NetType.patch,
@@ -266,6 +276,7 @@ class NetUtils {
     ).timeout(
       const Duration(seconds: NetutilGlobal.apiTimeOut),
       onTimeout: () {
+        Log.error(message: 'Gateway timeout for $url');
         throw NetException(
           code: 504,
           type: NetType.put,
@@ -280,6 +291,9 @@ class NetUtils {
     }
 
     // status code is not 200, means we got error
+    Log.error(
+      message: '[${response.statusCode}] ${response.reasonPhrase ?? ''} -> ${response.body}'
+    );
     throw NetException(
       code: response.statusCode,
       type: NetType.put,

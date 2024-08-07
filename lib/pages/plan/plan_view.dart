@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:go_router/go_router.dart';
 import 'package:simple_budget/_index.g.dart';
-import 'package:simple_budget/widgets/input/my_month_calendar.dart';
 
 class PlanViewPage extends StatefulWidget {
   final Object uid;
@@ -17,17 +16,42 @@ class PlanViewPage extends StatefulWidget {
 
 class _PlanViewPageState extends State<PlanViewPage> {
   late String _planUid;
+  late Future<bool> _getData;
 
   @override
   void initState() {
     // get the dashboard UID
     _planUid = widget.uid as String;
     
+    // get the data for this UID
+    _getData = _getPlanData();
+
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
+    return FutureBuilder(
+      future: _getData,
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          return _body();
+        }
+        else if (snapshot.hasError) {
+          // show error screen
+          return ErrorTemplatePage(
+            title: "Unable to get plan $_planUid",
+            message: "Unable to get plan detail information from backend, this might be due to some backend error or your internet connection is not available. Please check your internet connection or try again in a few minutes."
+          );
+        }
+        else {
+          return const Placeholder();
+        }
+      },
+    );
+  }
+
+  Widget _body() {
     return Scaffold(
       appBar: AppBar(
         title: const Center(
@@ -38,6 +62,7 @@ class _PlanViewPageState extends State<PlanViewPage> {
             ),
           ),
         ),
+        leading: _leadingAppBar(),
         actions: _actionAppBar(),
       ),
       body: MyBody(
@@ -45,8 +70,7 @@ class _PlanViewPageState extends State<PlanViewPage> {
           color: MyColor.primaryColorDark,
           backgroundColor: MyColor.backgroundColor,
           onRefresh: () async {
-            //TODO: refresh
-            debugPrint("Refresh!");
+            _getData = _getPlanData();
           },
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
@@ -78,46 +102,11 @@ class _PlanViewPageState extends State<PlanViewPage> {
                   ],
                 ),
                 const SizedBox(height: 10,),
-                Container(
-                  height: 25,
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(2),
-                  decoration: BoxDecoration(
-                    color: MyColor.backgroundColorDark,
-                    borderRadius: BorderRadius.circular(20)
-                  ),
-                  child: Stack(
-                    children: <Widget>[
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: <Widget>[
-                          Expanded(
-                            flex: 80,
-                            child: Container(
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [
-                                    MyColor.errorColor,
-                                    MyColor.warningColor,
-                                    MyColor.successColor,
-                                  ]
-                                ),
-                                borderRadius: BorderRadius.circular(20)
-                              ),
-                            ),
-                          ),
-                          Expanded(
-                            flex: 20,
-                            child: const SizedBox(),
-                          ),
-                        ],
-                      ),
-                      Center(
-                        child: Text("80% (36,000,000)"),
-                      ),
-                    ],
-                  ),
+                //TODO: to fill the correct value for the bar chart
+                const MyBarChart(
+                  value: 80,
+                  maxValue: 100,
+                  text: "36,000,000 (80%)",
                 ),
                 const SizedBox(height: 10,),
                 Text("Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book."),
@@ -129,8 +118,19 @@ class _PlanViewPageState extends State<PlanViewPage> {
                     DateTime(2024,7,1):true,
                     DateTime(2024,8,1):false,
                   },
-                  onTap: (date) {
-                    //TODO: show the modal bottom sheet to add the data
+                  onTap: (date) async {
+                    await _getPlanItem(date: date).then((_) async {
+                      _showPlanModal(date: date);
+                    }).onError((error, stackTrace) {
+                      // showed error
+                      Log.error(
+                        message: 'Error when get plan item for $date',
+                        error: error,
+                        stackTrace: stackTrace,
+                      );
+
+                      //TODO: give alert dialog
+                    },);
                   },
                   onDoubleTap: (date) {
                     context.go('/plan/$_planUid/item/${Globals.dfyyyyMMdd.format(date)}');
@@ -141,6 +141,19 @@ class _PlanViewPageState extends State<PlanViewPage> {
           ),
         )
       ),
+    );
+  }
+
+  Widget _leadingAppBar() {
+    //TODO: check if user logon or not here, if logon then we can show the edit menu
+    return IconButton(
+      onPressed: () {
+        context.go('/plan/$_planUid/edit');
+      },
+      icon: const Icon(
+        LucideIcons.pencil,
+        color: Colors.white,
+      )
     );
   }
 
@@ -184,5 +197,30 @@ class _PlanViewPageState extends State<PlanViewPage> {
     ret.add(const SizedBox(width: 10,));
 
     return ret;
+  }
+
+  Future<bool> _getPlanData() async {
+    // TODO: perform API call to get the plan
+    Log.info(message: "🖥️ Get plan data for $_planUid");
+    return true;
+  }
+
+  Future<void> _getPlanItem({required DateTime date}) async {
+    // TODO: perform API call to get item here
+    Log.info(message: "🖥️ Get plan item for $date");
+  }
+
+  Future<void> _showPlanModal({required DateTime date}) async {
+    await showModalBottomSheet(
+      isDismissible: false,
+      barrierColor: Colors.black.withOpacity(0.9),
+      context: context,
+      builder: (context) {
+        return PlanItemModal(
+          uid: _planUid,
+          date: date,
+        );
+      },
+    );
   }
 }

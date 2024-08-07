@@ -15,12 +15,13 @@ class PinInputPage extends StatefulWidget {
 }
 
 class _PinInputPageState extends State<PinInputPage> {
-  late String pinData;
+  late String _pinData;
+  late PinVerifyModel _pinModel;
 
   @override
   void initState() {
     // default the pin data into empty
-    pinData = '';
+    _pinData = '';
 
     super.initState();
   }
@@ -63,7 +64,7 @@ class _PinInputPageState extends State<PinInputPage> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: List<Widget>.generate(6, (index) {
-                      return _pinBox(id: (index+1), pinData: pinData);
+                      return _pinBox(id: (index+1), pinData: _pinData);
                     }),
                   ),
                 ),
@@ -131,19 +132,22 @@ class _PinInputPageState extends State<PinInputPage> {
     bool? disabled,
   }) {
     return GestureDetector(
-      onTap: (() {
+      onTap: (() async {
         if (!(disabled ?? false)) {
           // check if pinData is less than 6 or not?
-          if (pinData.length < 6) {
+          if (_pinData.length < 6) {
             setState(() {
-              pinData = "${pinData}1";
+              _pinData = "${_pinData}1";
             });
           }
           
-          if (pinData.length == 6) {
+          if (_pinData.length == 6) {
             // this is means the pin data already 6
-            // TODO: perform API call to verify the PIN
-            context.go('/plan/${widget.id}');
+            await _verifyPin(uid: widget.id, pin: _pinData).then((result) {
+              if (result) {
+                _goToPlanPage();
+              }
+            },);
           }
         }
       }),
@@ -170,9 +174,9 @@ class _PinInputPageState extends State<PinInputPage> {
     return GestureDetector(
       onTap: (() {
         // check if pinData is less than 6 or not?
-        if (pinData.isNotEmpty) {
+        if (_pinData.isNotEmpty) {
           setState(() {
-            pinData = pinData.substring(0, (pinData.length - 1));
+            _pinData = _pinData.substring(0, (_pinData.length - 1));
           });
         }
       }),
@@ -190,5 +194,54 @@ class _PinInputPageState extends State<PinInputPage> {
         ),
       ),
     );
+  }
+
+  Future<bool> _verifyPin({required String uid, required String pin}) async {
+    bool verifyResult = false;
+
+    // show the loading overlay
+    LoadingScreen.instance().show(context: context);
+
+    await PlanAPI.verifyPIN(
+      uid: uid,
+      pin: pin
+    ).then((result) {
+      _pinModel = result;
+
+      //TODO: stored the pin data on the secure storage
+
+      verifyResult = true;
+    }).onError((error, stackTrace) {
+      debugPrint("Error: ${error.toString()}");
+      debugPrintStack(stackTrace: stackTrace);
+      // reset the pin data into blank again
+      setState(() {
+        _pinData = '';
+      });
+      // // convert error to NetException
+      // NetException netError = error as NetException;
+
+      // // get the status code to determine whether this is due to unathorized
+      // // call or else?
+      // if (netError.code == 403) {
+      //   // PIN is invalid
+      //   //TODO: show dialog with pin invali
+      //   Log.error(message: "🔐 Invalid PIN for plan $uid");
+      // }
+      // else {
+      //   // Other error
+      //   //TODO: show the error dialog
+      //   Log.error(message: "⛔ ${netError.message}");
+      // }
+    },).whenComplete(() {
+      // remove loading screen overload
+      LoadingScreen.instance().hide();
+    },);
+
+    return verifyResult;
+  }
+
+  void _goToPlanPage() {
+    context.go('/plan/${widget.id}');
   }
 }

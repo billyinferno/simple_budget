@@ -1,3 +1,5 @@
+// API
+export './api/_index.g.dart';
 // MODEL
 export './model/_index.g.dart';
 // THEMES

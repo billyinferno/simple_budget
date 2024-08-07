@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 
 class PlanItemPage extends StatefulWidget {
-  const PlanItemPage({super.key});
+  final Object? date;
+  const PlanItemPage({
+    super.key,
+    required this.date,
+  });
 
   @override
   State<PlanItemPage> createState() => _PlanItemPageState();

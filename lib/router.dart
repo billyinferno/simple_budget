@@ -53,7 +53,7 @@ class _RouterPageState extends State<RouterPage> {
         builder: (context, state) {
           final String uid = (state.pathParameters["uid"] ?? '');
           if (uid.isEmpty) {
-            return const PageNotFound(
+            return const ErrorTemplatePage(
               title: "Plan UID Empty",
               message: "The Plan UID is empty, please ensure to check and input the correct UID for the plan."
             );
@@ -64,17 +64,24 @@ class _RouterPageState extends State<RouterPage> {
         },
         routes: <RouteBase>[
           GoRoute(
+            path: 'edit',
+            builder: (context, state) {
+              final String uid = (state.pathParameters["uid"] ?? '');
+              return PlanEditPage(uid: uid);
+            },
+          ),
+          GoRoute(
             path: 'item/:date',
             builder: (context, state) {
               final String date = (state.pathParameters["date"] ?? '');
-              return const PlanItemPage();
+              return PlanItemPage(date: date,);
             },
           ),
         ],
       ),
     ],
     errorBuilder: (context, state) {
-      return PageNotFound(
+      return ErrorTemplatePage(
         title: 'Page Not Found',
         message: 'The "${state.uri}" page that you looking for is not found. Please us arrow to return back to the main page.',
       );
