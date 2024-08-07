@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:go_router/go_router.dart';
@@ -137,7 +139,7 @@ class _PinInputPageState extends State<PinInputPage> {
           // check if pinData is less than 6 or not?
           if (_pinData.length < 6) {
             setState(() {
-              _pinData = "${_pinData}1";
+              _pinData = "$_pinData$num";
             });
           }
           
@@ -208,31 +210,31 @@ class _PinInputPageState extends State<PinInputPage> {
     ).then((result) {
       _pinModel = result;
 
-      //TODO: stored the pin data on the secure storage
+      // stored the pin model result on the secure storage
+      SecureBox.put(key: uid, value: jsonEncode(result.toJson()));
 
       verifyResult = true;
     }).onError((error, stackTrace) {
-      debugPrint("Error: ${error.toString()}");
-      debugPrintStack(stackTrace: stackTrace);
       // reset the pin data into blank again
       setState(() {
         _pinData = '';
       });
-      // // convert error to NetException
-      // NetException netError = error as NetException;
+      
+      // convert error to NetException
+      NetException netError = error as NetException;
 
-      // // get the status code to determine whether this is due to unathorized
-      // // call or else?
-      // if (netError.code == 403) {
-      //   // PIN is invalid
-      //   //TODO: show dialog with pin invali
-      //   Log.error(message: "🔐 Invalid PIN for plan $uid");
-      // }
-      // else {
-      //   // Other error
-      //   //TODO: show the error dialog
-      //   Log.error(message: "⛔ ${netError.message}");
-      // }
+      // get the status code to determine whether this is due to unathorized
+      // call or else?
+      if (netError.code == 403) {
+        // PIN is invalid
+        _showInvalidPin();
+        Log.error(message: "🔐 Invalid PIN for plan $uid");
+      }
+      else {
+        // Other error
+        //TODO: show the error dialog
+        Log.error(message: "⛔ ${netError.message}");
+      }
     },).whenComplete(() {
       // remove loading screen overload
       LoadingScreen.instance().hide();
@@ -243,5 +245,14 @@ class _PinInputPageState extends State<PinInputPage> {
 
   void _goToPlanPage() {
     context.go('/plan/${widget.id}');
+  }
+
+  void _showInvalidPin() {
+    MyDialog.showAlert(
+      context: context,
+      title: 'Invalid PIN',
+      text: 'Invalid PIN for viewing plan ${widget.id}.\nPlease check with the owner of the plan for the correct PIN.',
+      okayColor: MyColor.errorColor,
+    );
   }
 }

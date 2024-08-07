@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:go_router/go_router.dart';
@@ -16,6 +18,10 @@ class PlanViewPage extends StatefulWidget {
 
 class _PlanViewPageState extends State<PlanViewPage> {
   late String _planUid;
+  late PlanModel _planData;
+  late bool _isLogin;
+  late double _maxAmount;
+
   late Future<bool> _getData;
 
   @override
@@ -45,7 +51,7 @@ class _PlanViewPageState extends State<PlanViewPage> {
           );
         }
         else {
-          return const Placeholder();
+          return const LoadingPage();
         }
       },
     );
@@ -86,7 +92,7 @@ class _PlanViewPageState extends State<PlanViewPage> {
                   ),
                 ),
                 Text(
-                  ("Plan Goes to Korea").toUpperCase(),
+                  (_planData.name).toUpperCase(),
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 18,
@@ -98,19 +104,29 @@ class _PlanViewPageState extends State<PlanViewPage> {
                   children: <Widget>[
                     MyIconLabel(icon: LucideIcons.user, text: "3"),
                     MyIconLabel(icon: LucideIcons.dollar_sign, text: "36M (80%)"),
-                    MyIconLabel(icon: LucideIcons.calendar, text: "07/24 - 07/25", addPadding: false,),
+                    MyIconLabel(
+                      icon: LucideIcons.calendar,
+                      text: "${Globals.dfMMyy.format(_planData.startDate.toLocal())} - ${Globals.dfMMyy.format(_planData.endDate.toLocal())}",
+                      addPadding: false,
+                    ),
                   ],
                 ),
                 const SizedBox(height: 10,),
                 //TODO: to fill the correct value for the bar chart
-                const MyBarChart(
+                MyBarChart(
                   value: 80,
                   maxValue: 100,
-                  text: "36,000,000 (80%)",
+                  text: "36,000,000/$_maxAmount (80%)",
                 ),
                 const SizedBox(height: 10,),
-                Text("Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book."),
-                const SizedBox(height: 10,),
+                Visibility(
+                  visible: _planData.description.isNotEmpty,
+                  child: Text(_planData.description)
+                ),
+                Visibility(
+                  visible: _planData.description.isNotEmpty,
+                  child: const SizedBox(height: 10,)
+                ),
                 MyMonthCalendar(
                   startDate: DateTime(2024, 7, 1),
                   endDate: DateTime(2025, 7, 1),
@@ -128,8 +144,7 @@ class _PlanViewPageState extends State<PlanViewPage> {
                         error: error,
                         stackTrace: stackTrace,
                       );
-
-                      //TODO: give alert dialog
+                      _showErrorPlanItem(uid: _planUid, date: date);
                     },);
                   },
                   onDoubleTap: (date) {
@@ -160,18 +175,19 @@ class _PlanViewPageState extends State<PlanViewPage> {
   List<Widget> _actionAppBar() {
     List<Widget> ret = [];
 
-    //TODO: to check if user logon or not here, if logon then we can show the user menu
-    ret.add(
-      IconButton(
-        onPressed: (() {
-          context.go('/user');
-        }),
-        icon: const Icon(
-          LucideIcons.user,
-          color: MyColor.backgroundColor,
+    if(_isLogin) {
+      ret.add(
+        IconButton(
+          onPressed: (() {
+            context.go('/user');
+          }),
+          icon: const Icon(
+            LucideIcons.user,
+            color: MyColor.backgroundColor,
+          )
         )
-      )
-    );
+      );
+    }
 
     // add the URL copy
     ret.add(
@@ -200,8 +216,45 @@ class _PlanViewPageState extends State<PlanViewPage> {
   }
 
   Future<bool> _getPlanData() async {
-    // TODO: perform API call to get the plan
+    String? securedPin;
+    
+    // first check whether we login or not?
+    _isLogin = await UserStorage.isLogin();
+
+    // check if jwtToken is empty or not?
+    if (!_isLogin) {
+      // check if we have secured PIN?
+      String pinData = await SecureBox.get(key: _planUid);
+
+      // if this secured pin is empty then it means that the user doesn't have
+      // credentials to check this Plan, just return false.
+      if (pinData.isEmpty) {
+        return false;
+      }
+      else {
+        // convert the pin data to PIN verify model
+        PinVerifyModel pin = PinVerifyModel.fromJson(jsonDecode(pinData));
+        securedPin = pin.pin;
+      }
+    }
+
+    // log info
     Log.info(message: "🖥️ Get plan data for $_planUid");
+    
+    // call the Plan API to get the plan data
+    await PlanAPI.findSecure(
+      uid: _planUid,
+      pin: securedPin
+    ).then((result) {
+      _planData = result;
+
+      // calculate all the necessary data for plan view
+      _maxAmount = (MyDateUtils.monthDifference(
+        startDate: _planData.startDate,
+        endDate: _planData.endDate
+      )) * _planData.amount;
+    },);
+    
     return true;
   }
 
@@ -221,6 +274,15 @@ class _PlanViewPageState extends State<PlanViewPage> {
           date: date,
         );
       },
+    );
+  }
+
+  Future<void> _showErrorPlanItem({required String uid, required DateTime date}) async {
+    return MyDialog.showAlert(
+      context: context,
+      text: "Unable to get Plan Item date ${Globals.dfyyyyMMdd.format(date)} for Plan UID $uid.\nThis is might be due to error on the backend service or your internet is not available, please try again in a few minutes.",
+      okayLabel: "Ok",
+      okayColor: MyColor.errorColor,
     );
   }
 }

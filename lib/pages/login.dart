@@ -167,8 +167,20 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<bool> _checkPlanUID({required String uid}) async {
-    // TODO: to perform NET call for checking the UID
-    return true;
+    bool checkResult = false;
+
+    // show the loading overload
+    LoadingScreen.instance().show(context: context);
+
+    // call Plan API to see if this UID is exists or not?
+    await PlanAPI.check(uid: uid).then((result) {
+      debugPrint("Result $result");
+      checkResult = result;
+    }).whenComplete(() {
+      LoadingScreen.instance().hide();
+    },);
+    
+    return checkResult;
   }
 
   Future<void> _validateDashboardID() async {
@@ -189,7 +201,7 @@ class _LoginPageState extends State<LoginPage> {
         _goToPINPage(uid: dashboardId);
       }
       else {
-        _showSnackBar(errorMessage: "Plan UID not found");
+        _showSnackBar(errorMessage: "Plan with UID $dashboardId not found");
       }
     }).onError((error, stackTrace) {
       Log.error(
@@ -204,6 +216,7 @@ class _LoginPageState extends State<LoginPage> {
     ScaffoldMessenger.of(context).showSnackBar(
       createSnackBar(
         message: errorMessage,
+        color: MyColor.primaryColor,
       ),
     );
   }

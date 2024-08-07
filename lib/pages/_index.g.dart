@@ -1,4 +1,5 @@
 export './template/error_page.dart';
+export './template/loading_page.dart';
 
 export './plan/plan_edit.dart';
 export './plan/plan_item.dart';

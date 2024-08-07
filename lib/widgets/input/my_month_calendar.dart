@@ -159,7 +159,7 @@ class MyMonthCalendar extends StatelessWidget {
                 ),
               ),
               Text(
-                Globals.dfYY.format(date),
+                Globals.dfyy.format(date),
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 12,
