@@ -22,10 +22,10 @@ class Log {
   }
 
   static void warning({required String message}) {
-    _logger.w('\x1B[33m[success]\x1B[0m [${_df.format(DateTime.now())}] $message');
+    _logger.w('\x1B[33m[warning]\x1B[0m [${_df.format(DateTime.now())}] $message');
   }
 
   static void error({required String message, Object? error, StackTrace? stackTrace}) {
-    _logger.f('\x1B[31m[success]\x1B[0m [${_df.format(DateTime.now())}] $message', error: error, stackTrace: stackTrace);
+    _logger.f('\x1B[31m[error]\x1B[0m [${_df.format(DateTime.now())}] $message', error: error, stackTrace: stackTrace);
   }
 }
