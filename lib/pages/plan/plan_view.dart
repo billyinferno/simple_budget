@@ -221,6 +221,7 @@ class _PlanViewPageState extends State<PlanViewPage> {
     // first check whether we login or not?
     _isLogin = await UserStorage.isLogin();
 
+    // TODO: instead of checking is login first, check whether we have this UID in secure storage or not
     // check if jwtToken is empty or not?
     if (!_isLogin) {
       // check if we have secured PIN?
