@@ -5,11 +5,13 @@ import 'package:simple_budget/_index.g.dart';
 class PlanItemModal extends StatefulWidget {
   final String uid;
   final DateTime date;
+  final bool isLogin;
   //TODO: add the list of the participant data for this plan and date
   const PlanItemModal({
     super.key,
     required this.uid,
     required this.date,
+    required this.isLogin,
   });
 
   @override
@@ -87,6 +89,7 @@ class _PlanItemModalState extends State<PlanItemModal> {
                       date: widget.date,
                       name: "Nama Teman",
                       paid: (index % 3 == 0 ? true : false),
+                      enableSlide: widget.isLogin,
                       onAdd: (() async {
                         //TODO: to call API to add participation
                         Log.success(message: '👤 Add participation for "nama teman" on plan ${widget.uid} for ${widget.date}');

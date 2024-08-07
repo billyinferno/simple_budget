@@ -272,6 +272,7 @@ class _PlanViewPageState extends State<PlanViewPage> {
         return PlanItemModal(
           uid: _planUid,
           date: date,
+          isLogin: _isLogin,
         );
       },
     );
