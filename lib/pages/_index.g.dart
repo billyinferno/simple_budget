@@ -4,6 +4,7 @@ export './login/login_form.dart';
 export './template/error_page.dart';
 export './template/loading_page.dart';
 
+export './plan/plan_add.dart';
 export './plan/plan_edit.dart';
 export './plan/plan_item.dart';
 export './plan/plan_item_modal.dart';

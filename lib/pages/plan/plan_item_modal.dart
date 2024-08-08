@@ -96,7 +96,7 @@ class _PlanItemModalState extends State<PlanItemModal> {
                       uid: widget.uid,
                       date: widget.date,
                       name: widget.participation[index].name,
-                      paid: (index % 3 == 0 ? true : false),
+                      paid: (_contributionsMap[widget.participation[index].id] ?? false),
                       enableSlide: widget.isLogin,
                       onAdd: (() async {
                         //TODO: to call API to add participation

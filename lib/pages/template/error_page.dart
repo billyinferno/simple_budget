@@ -6,7 +6,7 @@ import 'package:simple_budget/_index.g.dart';
 class ErrorTemplatePage extends StatefulWidget {
   final String title;
   final String message;
-  final Function(void)? refresh;
+  final Function()? refresh;
   const ErrorTemplatePage({
     super.key,
     required this.title,
@@ -118,11 +118,9 @@ class _ErrorTemplatePageState extends State<ErrorTemplatePage> {
                 Visibility(
                   visible: (widget.refresh != null),
                   child:  MyButton(
-                    color: MyColor.primaryColorDark,
-                    onTap: (() {
-                      if (widget.refresh != null) {
-                        widget.refresh!;
-                      }
+                    color: MyColor.primaryColor,
+                    onTap: (() async {
+                      widget.refresh!();
                     }),
                     child: const Row(
                       crossAxisAlignment: CrossAxisAlignment.center,

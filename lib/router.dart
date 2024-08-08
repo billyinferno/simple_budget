@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -12,21 +11,10 @@ class RouterPage extends StatefulWidget {
 }
 
 class _RouterPageState extends State<RouterPage> with TickerProviderStateMixin {
-  late AnimationController _primary;
-  late AnimationController _secondary;
-  late Animation<double> _primaryAnimation;
-  late Animation<double> _secondaryAnimation;
-  
   late GoRouter _router;
 
   @override
   void initState() {
-    _primary = AnimationController(vsync: this, duration: const Duration(seconds: 1));
-    _secondary = AnimationController(vsync: this, duration: const Duration(seconds: 1));
-    _primaryAnimation = Tween<double>(begin: 0, end: 1).animate(CurvedAnimation(parent: _primary, curve: Curves.easeOut));
-    _secondaryAnimation = Tween<double>(begin: 0, end: 1).animate(CurvedAnimation(parent: _secondary, curve: Curves.easeOut));
-    _primary.forward();
-
     _router = GoRouter(
       initialLocation: '/',
       debugLogDiagnostics: kDebugMode,
@@ -46,6 +34,13 @@ class _RouterPageState extends State<RouterPage> with TickerProviderStateMixin {
           path: '/pin/:id',
           builder: (context, state) {
             final String id = (state.pathParameters["id"] ?? '');
+            if (id.isEmpty) {
+              return const ErrorTemplatePage(
+                title: "Plan UID Empty",
+                message: "The Plan UID is empty, please ensure to check and input the correct UID for the plan."
+              );
+            }
+
             return PinInputPage(id: id);
           },
         ),
@@ -64,6 +59,13 @@ class _RouterPageState extends State<RouterPage> with TickerProviderStateMixin {
           },
         ),
         GoRoute(
+          name: 'plan-add',
+          path: '/plan/add',
+          builder: (context, state) {
+            return const PlanAddPage();
+          },
+        ),
+        GoRoute(
           path: '/plan/:uid',
           builder: (context, state) {
             final String uid = (state.pathParameters["uid"] ?? '');
@@ -74,12 +76,7 @@ class _RouterPageState extends State<RouterPage> with TickerProviderStateMixin {
               );
             }
             else {
-              return CupertinoFullscreenDialogTransition(
-                primaryRouteAnimation: _primaryAnimation,
-                secondaryRouteAnimation: _secondaryAnimation,
-                linearTransition: false,
-                child: PlanViewPage(uid: uid,),
-              );
+              return PlanViewPage(uid: uid,);
             }
           },
           routes: <RouteBase>[
@@ -107,9 +104,61 @@ class _RouterPageState extends State<RouterPage> with TickerProviderStateMixin {
         );
       },
       redirect: (context, state) async {
-        //TODO: to check for specific page only
-        bool isLogin = await UserStorage.isLogin();
-        if (!isLogin) return '/login';
+        String path = '';
+        if (state.uri.pathSegments.isNotEmpty) {
+          path = state.uri.pathSegments[0].toLowerCase();
+        }
+
+        // now check whether path is part of public or not?
+        bool isPublic = false;
+        bool isPin = false;
+        switch(path) {
+          case "":
+          case "pin":
+          case "login":
+            isPublic = true;
+            isPin = true;
+            break;
+          case "plan":
+            // check the 2nd path
+            // TODO: to check why plan add is not secured with JWT
+            if (state.uri.pathSegments.length > 1) {
+              String uid = (state.uri.pathSegments[1]).toUpperCase();
+              // check if uid is ADD
+              if (uid == "ADD") {
+                isPin = false;
+              }
+              isPin = true;
+            }
+            else {
+              isPin = false;
+            }
+            break;
+        }
+
+        if (!isPublic) {
+          bool isLogin = await UserStorage.isLogin();
+          bool isSecuredPin = false;
+          if (isPin) {
+            // this is only for plan view, the 2nd path should be the UID
+            // so check whether we have the UID secured pin in the secure storage
+            // or not?
+            String securedPin = await UserStorage.getSecuredPin();
+
+            if (securedPin.isNotEmpty) {
+              isSecuredPin = true;
+            }
+          }
+
+          if (!isLogin) {
+            // check if this got secured PIN or not?
+            if (!isSecuredPin) {
+              return '/login';
+            }
+          }
+        }
+
+        // return null so we can go the the actual path
         return null;
       },
     );

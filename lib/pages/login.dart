@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:simple_budget/_index.g.dart';
@@ -107,34 +109,64 @@ class _LoginPageState extends State<LoginPage> {
   Future<bool> _getUserMe() async {
     // check if we have JWT in the secure storage first
     String jwt = await UserStorage.jwt();
-    if (jwt.isEmpty) {
+    String securedPin = await UserStorage.getSecuredPin();
+    
+    if (jwt.isEmpty && securedPin.isEmpty) {
       // no JWT, means user not login
-      Log.info(message: "👤 User not yet login");
+      Log.info(message: "👤 User not login");
       return false;
     }
+    else {
+      if (jwt.isNotEmpty) {
+        Log.info(message: "👤 Login using JWT");
 
-    // if reach here, it means that JWT is exists, set the JWT we want to use
-    NetUtils.setJWT(bearerToken: jwt);
+        // if reach here, it means that JWT is exists, set the JWT we want to use
+        NetUtils.setJWT(bearerToken: jwt);
 
-    // users/me API to get the user information
-    Log.info(message: "👤 Get users/me information");
-    await UserAPI.me().then((user) async {
-      // user login already, stored the user information model in the storage
-      await UserStorage.setUserInfo(user);
+        // users/me API to get the user information
+        Log.info(message: "👤 Get users/me information");
+        await UserAPI.me().then((user) async {
+          // user login already, stored the user information model in the storage
+          await UserStorage.setUserInfo(user);
 
-      // we can go to the dashboard instead stay in login screen
-      if (mounted) {
-        Log.info(message: "🔐 User login already navigate to dashboard");
-        context.go('/dashboard');
+          // we can go to the dashboard instead stay in login screen
+          if (mounted) {
+            Log.success(message: "🔐 User login already navigate to dashboard");
+            context.go('/dashboard');
+          }
+        },).onError((error, stackTrace) {
+          // user JWT token is expired
+          Log.error(
+            message: "👤 User JWT token is expired",
+            error: error,
+            stackTrace: stackTrace,
+          );
+        },);
       }
-    },).onError((error, stackTrace) {
-      // user JWT token is expired
-      Log.error(
-        message: "👤 User JWT token is expired",
-        error: error,
-        stackTrace: stackTrace,
-      );
-    },);
+      if (securedPin.isNotEmpty) {
+        Log.info(message: "👤 Login using Secured PIN");
+
+        // if reach here, we can verify the UID with the secure PIN
+        PinVerifyModel pinData = PinVerifyModel.fromJson(jsonDecode(securedPin));
+
+        Log.info(message: "👤 Verify secured pin for ${pinData.uid}");
+        await PlanAPI.findSecure(uid: pinData.uid, pin: pinData.pin).then((value) {
+          // correct secured PIN for the plan, it means that we can go to the
+          // planView page.
+          if (mounted) {
+            Log.success(message: "🔐 User secured PIN correct navigate to plan ${pinData.uid}");
+            context.go('/plan/${pinData.uid}');
+          }
+        },).onError((error, stackTrace) {
+          // wrong secured PIN
+          Log.error(
+            message: "👤 Invalid Secured PIN for the data",
+            error: error,
+            stackTrace: stackTrace,
+          );
+        },);
+      }
+    }
 
     // default this to return false so we can show the login screen
     return false;

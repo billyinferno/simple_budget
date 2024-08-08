@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:go_router/go_router.dart';
@@ -209,7 +207,7 @@ class _PinInputPageState extends State<PinInputPage> {
     ).then((result) async {
       // stored the pin model result on the secure storage
       Log.info(message: "🔐 Put secure PIN for $uid in SecureBox");
-      await SecureBox.put(key: uid, value: jsonEncode(result.toJson()));
+      await UserStorage.putSecuredPin(data: result);
 
       verifyResult = true;
     }).onError((error, stackTrace) {

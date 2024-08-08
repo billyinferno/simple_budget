@@ -21,15 +21,24 @@ class _PlanViewPageState extends State<PlanViewPage> {
   late String _planUid;
   late PlanModel _planData;
   late bool _isLogin;
+  late double _currentAmount;
   late double _maxAmount;
+  late int _currentPercentage;
 
   late Future<bool> _getData;
+  late Map<DateTime, bool> _paymentData;
 
   @override
   void initState() {
     // get the dashboard UID
     _planUid = widget.uid as String;
-    
+
+    // initialize data
+    _currentAmount = 0;
+    _maxAmount = 1;
+    _currentPercentage = 0;
+    _paymentData = {};
+
     // get the data for this UID
     _getData = _getPlanData();
 
@@ -45,14 +54,27 @@ class _PlanViewPageState extends State<PlanViewPage> {
           return _body();
         }
         else if (snapshot.hasError) {
-          // show error screen
-          return ErrorTemplatePage(
-            title: "Unable to get plan $_planUid",
-            message: "Unable to get plan detail information from backend, this might be due to some backend error or your internet connection is not available. Please check your internet connection or try again in a few minutes.",
-            refresh: ((_) async {
-              _getData = _getPlanData();
-            }),
-          );
+          debugPrintStack(stackTrace: snapshot.stackTrace);
+          ErrorInformation error  = snapshot.error as ErrorInformation;
+
+          // check if this is 403 or not?
+          if (error.status == 403) {
+            // show error screen without refresh
+            return ErrorTemplatePage(
+              title: "Unable to get plan $_planUid",
+              message: error.message,
+            );
+          }
+          else {
+            // show error screen with refresh
+            return ErrorTemplatePage(
+              title: "Unable to get plan $_planUid",
+              message: error.message,
+              refresh: (() async {
+                _getData = _getPlanData();
+              }),
+            );
+          }
         }
         else {
           return const LoadingPage();
@@ -76,6 +98,7 @@ class _PlanViewPageState extends State<PlanViewPage> {
         actions: _actionAppBar(),
       ),
       body: MyBody(
+        padding: const EdgeInsets.fromLTRB(10, 0, 10, 20),
         child: RefreshIndicator(
           color: MyColor.primaryColorDark,
           backgroundColor: MyColor.backgroundColor,
@@ -101,13 +124,14 @@ class _PlanViewPageState extends State<PlanViewPage> {
                     fontWeight: FontWeight.bold,
                     fontSize: 18,
                   ),
+                  overflow: TextOverflow.ellipsis,
                 ),
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
                     MyIconLabel(icon: LucideIcons.user, text: "${_planData.participations.length}"),
-                    MyIconLabel(icon: LucideIcons.dollar_sign, text: "36M (80%)"),
+                    MyIconLabel(icon: LucideIcons.dollar_sign, text: "${MyNumberUtils.formatCurrencyWithNull(amount: _currentAmount)} ($_currentPercentage%)"),
                     MyIconLabel(
                       icon: LucideIcons.calendar,
                       text: "${Globals.dfMMyy.format(_planData.startDate.toLocal())} - ${Globals.dfMMyy.format(_planData.endDate.toLocal())}",
@@ -116,11 +140,10 @@ class _PlanViewPageState extends State<PlanViewPage> {
                   ],
                 ),
                 const SizedBox(height: 10,),
-                //TODO: to fill the correct value for the bar chart
                 MyBarChart(
-                  value: 80,
+                  value: _currentPercentage,
                   maxValue: 100,
-                  text: "36,000,000/${MyNumberUtils.formatCurrency(amount: _maxAmount)} (80%)",
+                  text: "${MyNumberUtils.formatCurrencyWithNull(amount: _currentAmount)}/${MyNumberUtils.formatCurrency(amount: _maxAmount)} ($_currentPercentage%)",
                 ),
                 const SizedBox(height: 10,),
                 Visibility(
@@ -134,31 +157,27 @@ class _PlanViewPageState extends State<PlanViewPage> {
                 MyMonthCalendar(
                   startDate: DateTime(2024, 7, 1),
                   endDate: DateTime(2025, 7, 1),
-                  payment: {
-                    DateTime(2024,7,1):true,
-                    DateTime(2024,8,1):false,
-                  },
+                  payment: _paymentData,
                   onTap: (date) async {
                     if (
                       date.toLocal().isBefore(DateTime.now().toLocal()) ||
                       date.toLocal().isAtSameMomentAs(DateTime.now().toLocal())
                     ) {
-                      await _getPlanItem(date: date).then((_) async {
-                        _showPlanModal(date: date);
-                      }).onError((error, stackTrace) {
-                        // showed error
-                        Log.error(
-                          message: 'Error when get plan item for $date',
-                          error: error,
-                          stackTrace: stackTrace,
-                        );
-                        _showErrorPlanItem(uid: _planUid, date: date);
-                      },);
+                      await _showPlanModal(date: date);
                     }
                   },
                   onDoubleTap: (date) {
                     context.go('/plan/$_planUid/item/${Globals.dfyyyyMMdd.format(date)}');
                   },
+                ),
+                const SizedBox(height: 20,),
+                const Center(
+                  child: Text(
+                    "Press on the calendar month to view detail.",
+                    style: TextStyle(
+                      fontSize: 12,
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -278,20 +297,33 @@ class _PlanViewPageState extends State<PlanViewPage> {
     _isLogin = await UserStorage.isLogin();
 
     // then check if we have secured PIN?
-    String pinData = await SecureBox.get(key: _planUid);
+    String pinData = await UserStorage.getSecuredPin();
 
     // if this secured pin is empty then it means that the user doesn't have
     // credentials to check this Plan, just return false.
     if (pinData.isEmpty) {
       // check if jwtToken is empty or not?
       if (!_isLogin) {
-        throw Exception('No authentication token or secure PIN available');
+        throw ErrorInformation(
+          status: 403,
+          name: 'Unauthorized',
+          message: 'No authentication token or secure PIN available'
+        );
       }
     }
     else {
       // convert the pin data to PIN verify model
       PinVerifyModel pin = PinVerifyModel.fromJson(jsonDecode(pinData));
       securedPin = pin.pin;
+
+      // ensure that the UID is the same as the one we got from the URL
+      if (_planUid.toUpperCase() != pin.uid.toUpperCase()) {
+        throw ErrorInformation(
+          status: 403,
+          name: 'Unauthorized',
+          message: 'Accessing different UID with the one on secure PIN',
+        );
+      }
     }
 
     // log info
@@ -307,18 +339,56 @@ class _PlanViewPageState extends State<PlanViewPage> {
       ).then((result) {
         _planData = result;
       },);
-
-      //TODO: to get the rest of the API
     },).then((_) {
-      // calculate all the necessary data for plan view
-      // TODO: to add also number of participant
-      _maxAmount = (MyDateUtils.monthDifference(
-        startDate: _planData.startDate,
-        endDate: _planData.endDate
-      )) * _planData.amount * _planData.participations.length;
+      _calculateData();
+    },).onError((error, stackTrace) {
+      Log.error(
+        message: "Error when get the Plan information",
+        error: error,
+        stackTrace: stackTrace,
+      );
+
+      // convert error as NetException
+      NetException netError = error as NetException;
+      throw ErrorInformation(
+        status: netError.code,
+        name: netError.message,
+        message: 'Unable to get data from the backend, please help to check if your internet is active, and please try again.',
+      );
     },);
     
     return true;
+  }
+
+  void _calculateData() {
+    // calculate all the necessary data for plan view
+    _maxAmount = (MyDateUtils.monthDifference(
+      startDate: _planData.startDate,
+      endDate: _planData.endDate
+    )) * _planData.amount * _planData.participations.length;
+
+    // calculate the current amount
+    // we can do this by loop thru the contributon map, whil we doing this
+    // we can also generate the payment map data based on the contributions
+    for(String date in _planData.contributions!.keys) {
+      // convert this date from string to DateTime
+      DateTime dt = DateTime.parse(date);
+
+      if (_planData.contributions![date]!.length == _planData.participations.length) {
+        _paymentData[dt] = true;
+      }
+      else{
+        _paymentData[dt] = false;
+      }
+
+      // calculate the current amount
+      _currentAmount = _currentAmount + (_planData.contributions![date]!.length * _planData.amount);
+    }
+
+    // once got the current and max amount, we can calculate the percentage
+    if (_maxAmount > 0) {
+      _currentPercentage = ((_currentAmount / _maxAmount) * 100).toInt();
+    }
   }
 
   Future<void> _getPlanItem({required DateTime date}) async {
