@@ -18,7 +18,6 @@ class PinInputPage extends StatefulWidget {
 
 class _PinInputPageState extends State<PinInputPage> {
   late String _pinData;
-  late PinVerifyModel _pinModel;
 
   @override
   void initState() {
@@ -207,11 +206,10 @@ class _PinInputPageState extends State<PinInputPage> {
     await PlanAPI.verifyPIN(
       uid: uid,
       pin: pin
-    ).then((result) {
-      _pinModel = result;
-
+    ).then((result) async {
       // stored the pin model result on the secure storage
-      SecureBox.put(key: uid, value: jsonEncode(result.toJson()));
+      Log.info(message: "🔐 Put secure PIN for $uid in SecureBox");
+      await SecureBox.put(key: uid, value: jsonEncode(result.toJson()));
 
       verifyResult = true;
     }).onError((error, stackTrace) {

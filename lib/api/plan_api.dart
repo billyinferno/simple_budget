@@ -21,21 +21,15 @@ class PlanAPI {
   }
 
   static Future<bool> check({required String uid}) async {
-    bool returnCheck = false;
-
     await NetUtils.post(
       url: Globals.apiPlanCheck,
       body: {
-        "uid":uid
+        "uid":uid.toUpperCase()
       },
       requiredJWT: false,
-    ).then((_) {
-      returnCheck = true;
-    }).onError((error, stackTrace) {
-      returnCheck = false;
-    },);
+    );
 
-    return returnCheck;
+    return true;
   }
 
   static Future<PlanModel> findSecure({required String uid, String? pin}) async {
@@ -46,13 +40,13 @@ class PlanAPI {
     if (pin == null) {
       requiredJwt = true;
       body = {
-        "uid": uid
+        "uid": uid.toUpperCase()
       };
     }
     else {
       // we will usinggenerate the body
       body = {
-        "uid": uid,
+        "uid": uid.toUpperCase(),
         "pin": pin
       };
     }
@@ -68,5 +62,21 @@ class PlanAPI {
     PlanModel plan = PlanModel.fromJson(commonModel.data['attributes']);
 
     return plan;
+  }
+
+  static Future<List<PlanModel>> getPlanList() async {
+    // get the company data using netutils
+    final String body = await NetUtils.get(
+      url: Globals.apiPlanList
+    );
+
+    // parse the response to get the sector name list
+    CommonArrayModel commonModel = CommonArrayModel.fromJson(jsonDecode(body));
+    List<PlanModel> plans = [];
+    for (var data in commonModel.data) {
+      PlanModel plan = PlanModel.fromJson(data['attributes']);
+      plans.add(plan);
+    }
+    return plans;
   }
 }

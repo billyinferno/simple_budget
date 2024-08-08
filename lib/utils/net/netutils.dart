@@ -4,21 +4,36 @@ import 'package:http/http.dart' as http;
 import 'package:simple_budget/_index.g.dart';
 
 class NetUtils {
-  static String? bearerToken;
+  static String? _bearerToken;
 
   /// refreshJWT
   /// Refresh current JWT token with the one stored on the Encrypted Box under
   /// User Shared Preferences.
   static void setJWT({required String bearerToken}) {
-    bearerToken = bearerToken;
+    _bearerToken = bearerToken;
   }
 
   /// clearJWT
   /// Clear current JWT Token and set it as NULL
   static void clearJWT() {
-    bearerToken = null;
+    _bearerToken = null;
   }
 
+  static Future<void> getJwt() async {
+    // check if _bearerToken is null or not?
+    if (_bearerToken == null) {
+      // get the JWT from the secure box
+      final String jwt = await SecureBox.get(key: 'jwt');
+      
+      // check if jwt is empty or not, if not then set the _bearerToken with jwt
+      if (jwt.isNotEmpty) {
+        _bearerToken = jwt;
+      }
+    }
+  }
+
+  /// _header
+  /// generate header needed whether we need JWT or not
   static Map<String, String> _header({required NetType type, required bool? requiredJWT}) {
     Map<String, String> header = {};
     
@@ -28,7 +43,7 @@ class NetUtils {
     };
 
     if (requiredJWT ?? true) {
-      if (bearerToken == null) {
+      if (_bearerToken == null) {
         throw NetException(
           code: 403,
           type: type,
@@ -38,9 +53,9 @@ class NetUtils {
     }
 
     // check if bearer token is null and whether required jwt or not?
-    if (bearerToken != null && (requiredJWT ?? true)) {
+    if (_bearerToken != null && (requiredJWT ?? true)) {
       header = {
-        HttpHeaders.authorizationHeader: "Bearer $bearerToken",
+        HttpHeaders.authorizationHeader: "Bearer $_bearerToken",
         'Content-Type': 'application/json',
       };
     }
@@ -63,6 +78,9 @@ class NetUtils {
     if (params != null) {
       uri = uri.replace(queryParameters: params);
     }
+
+    // get the jwt
+    await getJwt();
 
     // bearer token is not empty, we can perform call to the API
     final response = await http.get(
@@ -111,6 +129,9 @@ class NetUtils {
     if (params != null) {
       uri = uri.replace(queryParameters: params);
     }
+
+    // get the jwt
+    await getJwt();
 
     // bearer token is not empty, we can perform call to the API
     final response = await http.post(
@@ -162,6 +183,9 @@ class NetUtils {
       uri = uri.replace(queryParameters: params);
     }
 
+    // get the jwt
+    await getJwt();
+
     // bearer token is not empty, we can perform call to the API
     final response = await http.delete(
       uri,
@@ -212,6 +236,9 @@ class NetUtils {
     if (params != null) {
       uri = uri.replace(queryParameters: params);
     }
+
+    // get the jwt
+    await getJwt();
 
     // bearer token is not empty, we can perform call to the API
     final response = await http.patch(
@@ -267,6 +294,9 @@ class NetUtils {
     if (params != null) {
       uri = uri.replace(queryParameters: params);
     }
+
+    // get the jwt
+    await getJwt();
 
     // bearer token is not empty, we can perform call to the API
     final response = await http.put(

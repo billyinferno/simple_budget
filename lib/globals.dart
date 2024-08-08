@@ -8,12 +8,16 @@ class Globals {
   static DateFormat dfMon = DateFormat('MMM');
   static DateFormat dfyy = DateFormat('yy');
   static DateFormat dfyyyyMMdd = DateFormat('yyyy-MM-dd');
+  static DateFormat dfyyMon = DateFormat('yyyy-MMM');
 
   // URL portion for the NetUtils
   static String apiURL = (dotenv.env['API_URL'] ?? 'http://192.168.1.176:1337');
   static int apiTimeOut = 30;
 
+  static String apiAuthLocal = '$apiURL/api/auth/local';
+  static String apiUserMe = '$apiURL/api/users/me';
   static String apiPlanPinVerify = '$apiURL/api/plans/pin/verify';
   static String apiPlanCheck = '$apiURL/api/plans/check';
   static String apiPlanFind = '$apiURL/api/plans/findSecure';
+  static String apiPlanList = '$apiURL/api/plans/list';
 }

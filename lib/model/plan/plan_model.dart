@@ -4,6 +4,8 @@
 
 import 'dart:convert';
 
+import 'package:simple_budget/model/_index.g.dart';
+
 PlanModel planModelFromJson(String str) => PlanModel.fromJson(json.decode(str));
 
 String planModelToJson(PlanModel data) => json.encode(data.toJson());
@@ -16,6 +18,8 @@ class PlanModel {
     final String description;
     final double amount;
     final bool readOnly;
+    final List<ParticipationModel> participations;
+    final Map<String, List<ContributionModel>>? contributions;
 
     PlanModel({
         required this.uid,
@@ -25,6 +29,8 @@ class PlanModel {
         required this.description,
         required this.amount,
         required this.readOnly,
+        required this.participations,
+        this.contributions,
     });
 
     factory PlanModel.fromJson(Map<String, dynamic> json) => PlanModel(
@@ -32,9 +38,11 @@ class PlanModel {
         name: json["name"],
         startDate: DateTime.parse(json["startDate"]),
         endDate: DateTime.parse(json["endDate"]),
-        description: json["description"],
-        amount: json["amount"]?.toDouble(),
+        description: (json["description"] ?? ''),
+        amount: (json["amount"] == null ? 0 : json["amount"]?.toDouble()),
         readOnly: (json["readOnly"] ?? true),
+        participations: List<ParticipationModel>.from(json["participations"].map((x) => ParticipationModel.fromJson(x))),
+        contributions: (json["contributions"] == null ? {} : Map.from(json["contributions"]).map((k, v) => MapEntry<String, List<ContributionModel>>(k, List<ContributionModel>.from(v.map((x) => ContributionModel.fromJson(x)))))),
     );
 
     Map<String, dynamic> toJson() => {
@@ -45,5 +53,7 @@ class PlanModel {
         "description": description,
         "amount": amount,
         "readOnly": readOnly,
+        "participations": List<dynamic>.from(participations.map((x) => x.toJson())),
+        "contributions": (contributions == null ? "{}" : Map.from(contributions!).map((k, v) => MapEntry<String, dynamic>(k, List<dynamic>.from(v.map((x) => x.toJson()))))),
     };
 }

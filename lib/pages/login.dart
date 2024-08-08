@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:simple_budget/_index.g.dart';
@@ -46,8 +45,7 @@ class _LoginPageState extends State<LoginPage> {
             return _generateBody();
           }
           else {
-            // TODO: still loading, generate splash screen
-            return const Placeholder();
+            return const LoadingPage();
           }
         },
       ),
@@ -81,7 +79,7 @@ class _LoginPageState extends State<LoginPage> {
               borderRadius: BorderRadius.circular(5),
             ),
             child: Center(
-              child: _showForm()
+              child: _showPage()
             ),
           ),
           const SizedBox(height: 10,),
@@ -97,132 +95,48 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Widget _showForm() {
+  Widget _showPage() {
     if (_currentTab.toUpperCase() == "L") {
-      return _showLoginForm();
+      return const LoginFormPage();
     }
     else {
-      return _showViewForm();
+      return const LoginViewPage();
     }
-  }
-
-  Widget _showLoginForm() {
-    // TODO: to do login form
-    return Text("Login form");
-  }
-
-  Widget _showViewForm() {
-    // TODO: to do view form
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        const Text(
-          "DASHBOARD ID",
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 14,
-            color: Colors.white,
-          ),
-        ),
-        const SizedBox(height: 5,),
-        CupertinoTextField(
-          controller: _dashboardIdController,
-          decoration: BoxDecoration(
-            color: MyColor.backgroundColor,
-            borderRadius: BorderRadius.circular(25)
-          ),
-          textAlign: TextAlign.center,
-          maxLength: 6,
-          maxLines: 1,
-          style: const TextStyle(
-            fontSize: 35,
-            fontWeight: FontWeight.bold,
-          ),
-          cursorColor: MyColor.primaryColorDark,
-        ),
-        const Expanded(child: SizedBox(),),
-        MyButton(
-          color: MyColor.primaryColorDark,
-          child: const Center(
-            child: Text(
-              "VIEW",
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-          onTap: () async {
-            _validateDashboardID();
-          },
-        ),
-      ],
-    );
   }
 
   Future<bool> _getUserMe() async {
-    // TODO: to change with api call
-    return false;
-  }
-
-  Future<bool> _checkPlanUID({required String uid}) async {
-    bool checkResult = false;
-
-    // show the loading overload
-    LoadingScreen.instance().show(context: context);
-
-    // call Plan API to see if this UID is exists or not?
-    await PlanAPI.check(uid: uid).then((result) {
-      debugPrint("Result $result");
-      checkResult = result;
-    }).whenComplete(() {
-      LoadingScreen.instance().hide();
-    },);
-    
-    return checkResult;
-  }
-
-  Future<void> _validateDashboardID() async {
-    String dashboardId = _dashboardIdController.text.toUpperCase();
-    if (dashboardId.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        createSnackBar(
-          message: "Please fill dashboard ID",
-          color: MyColor.primaryColor,
-        )
-      );
-      // stop processing
-      return;
+    // check if we have JWT in the secure storage first
+    String jwt = await UserStorage.jwt();
+    if (jwt.isEmpty) {
+      // no JWT, means user not login
+      Log.info(message: "👤 User not yet login");
+      return false;
     }
-    
-    await _checkPlanUID(uid: dashboardId).then((result) {
-      if (result) {
-        _goToPINPage(uid: dashboardId);
+
+    // if reach here, it means that JWT is exists, set the JWT we want to use
+    NetUtils.setJWT(bearerToken: jwt);
+
+    // users/me API to get the user information
+    Log.info(message: "👤 Get users/me information");
+    await UserAPI.me().then((user) async {
+      // user login already, stored the user information model in the storage
+      await UserStorage.setUserInfo(user);
+
+      // we can go to the dashboard instead stay in login screen
+      if (mounted) {
+        Log.info(message: "🔐 User login already navigate to dashboard");
+        context.go('/dashboard');
       }
-      else {
-        _showSnackBar(errorMessage: "Plan with UID $dashboardId not found");
-      }
-    }).onError((error, stackTrace) {
+    },).onError((error, stackTrace) {
+      // user JWT token is expired
       Log.error(
-        message: "Error when call check plan UID",
+        message: "👤 User JWT token is expired",
         error: error,
         stackTrace: stackTrace,
       );
     },);
-  }
 
-  void _showSnackBar({required String errorMessage}) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      createSnackBar(
-        message: errorMessage,
-        color: MyColor.primaryColor,
-      ),
-    );
-  }
-
-  void _goToPINPage({required String uid}) {
-    // go to pin input page
-    context.go('/pin/$uid');
+    // default this to return false so we can show the login screen
+    return false;
   }
 }

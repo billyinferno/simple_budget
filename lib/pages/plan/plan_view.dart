@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:go_router/go_router.dart';
 import 'package:simple_budget/_index.g.dart';
+import 'package:simple_budget/utils/number.dart';
 
 class PlanViewPage extends StatefulWidget {
   final Object uid;
@@ -47,7 +48,10 @@ class _PlanViewPageState extends State<PlanViewPage> {
           // show error screen
           return ErrorTemplatePage(
             title: "Unable to get plan $_planUid",
-            message: "Unable to get plan detail information from backend, this might be due to some backend error or your internet connection is not available. Please check your internet connection or try again in a few minutes."
+            message: "Unable to get plan detail information from backend, this might be due to some backend error or your internet connection is not available. Please check your internet connection or try again in a few minutes.",
+            refresh: ((_) async {
+              _getData = _getPlanData();
+            }),
           );
         }
         else {
@@ -102,7 +106,7 @@ class _PlanViewPageState extends State<PlanViewPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
-                    MyIconLabel(icon: LucideIcons.user, text: "3"),
+                    MyIconLabel(icon: LucideIcons.user, text: "${_planData.participations.length}"),
                     MyIconLabel(icon: LucideIcons.dollar_sign, text: "36M (80%)"),
                     MyIconLabel(
                       icon: LucideIcons.calendar,
@@ -116,7 +120,7 @@ class _PlanViewPageState extends State<PlanViewPage> {
                 MyBarChart(
                   value: 80,
                   maxValue: 100,
-                  text: "36,000,000/$_maxAmount (80%)",
+                  text: "36,000,000/${MyNumberUtils.formatCurrency(amount: _maxAmount)} (80%)",
                 ),
                 const SizedBox(height: 10,),
                 Visibility(
@@ -135,17 +139,22 @@ class _PlanViewPageState extends State<PlanViewPage> {
                     DateTime(2024,8,1):false,
                   },
                   onTap: (date) async {
-                    await _getPlanItem(date: date).then((_) async {
-                      _showPlanModal(date: date);
-                    }).onError((error, stackTrace) {
-                      // showed error
-                      Log.error(
-                        message: 'Error when get plan item for $date',
-                        error: error,
-                        stackTrace: stackTrace,
-                      );
-                      _showErrorPlanItem(uid: _planUid, date: date);
-                    },);
+                    if (
+                      date.toLocal().isBefore(DateTime.now().toLocal()) ||
+                      date.toLocal().isAtSameMomentAs(DateTime.now().toLocal())
+                    ) {
+                      await _getPlanItem(date: date).then((_) async {
+                        _showPlanModal(date: date);
+                      }).onError((error, stackTrace) {
+                        // showed error
+                        Log.error(
+                          message: 'Error when get plan item for $date',
+                          error: error,
+                          stackTrace: stackTrace,
+                        );
+                        _showErrorPlanItem(uid: _planUid, date: date);
+                      },);
+                    }
                   },
                   onDoubleTap: (date) {
                     context.go('/plan/$_planUid/item/${Globals.dfyyyyMMdd.format(date)}');
@@ -160,16 +169,43 @@ class _PlanViewPageState extends State<PlanViewPage> {
   }
 
   Widget _leadingAppBar() {
-    //TODO: check if user logon or not here, if logon then we can show the edit menu
-    return IconButton(
-      onPressed: () {
-        context.go('/plan/$_planUid/edit');
-      },
-      icon: const Icon(
-        LucideIcons.pencil,
-        color: Colors.white,
-      )
-    );
+    if (_isLogin) {
+      return IconButton(
+        onPressed: () {
+          context.go('/dashboard');
+        },
+        icon: const Icon(
+          LucideIcons.arrow_left,
+          color: Colors.white,
+        )
+      );
+    }
+    else {
+      return IconButton(
+        onPressed: () async {
+          bool? result = await MyDialog.showConfirmation(
+            context: context,
+            text: "Do you want to logout from this plan ($_planUid)?",
+            okayColor: MyColor.errorColor,
+            cancelColor: MyColor.backgroundColor,
+          );
+
+          if (result ?? false) {
+            // clear the secure storage
+            await SecureBox.deleteAll().then((value) {
+              if (mounted) {
+              // go to the login page
+                context.go('/login');
+              }
+            },);
+          }
+        },
+        icon: const Icon(
+          LucideIcons.x,
+          color: Colors.white,
+        )
+      );
+    }
   }
 
   List<Widget> _actionAppBar() {
@@ -178,12 +214,12 @@ class _PlanViewPageState extends State<PlanViewPage> {
     if(_isLogin) {
       ret.add(
         IconButton(
-          onPressed: (() {
-            context.go('/user');
-          }),
+          onPressed: () {
+            context.go('/plan/$_planUid/edit');
+          },
           icon: const Icon(
-            LucideIcons.user,
-            color: MyColor.backgroundColor,
+            LucideIcons.pencil,
+            color: Colors.white,
           )
         )
       );
@@ -193,15 +229,35 @@ class _PlanViewPageState extends State<PlanViewPage> {
     ret.add(
       IconButton(
         onPressed: (() async {
-          await MyClipboard.copyToClipboard(
-            text: Uri.base.toString()
-          ).then((_) {
-            //TODO: to handle success with alert box showing success
-            Log.success(message: "🌍 URL copied to the clipboard");
+          // default the pin exists into false, assuming that the plan doesn't
+          // have any PIN set yet.
+          bool pinExists = false;
+
+          // show loading screen
+          LoadingScreen.instance().show(context: context);
+
+          // check and ensure the PIN is already set for this
+          await PlanAPI.check(uid: _planUid).then((check) async {
+            pinExists = check;
           }).onError((error, stackTrace) {
-            //TODO: to handle clipboard error with alert box
-            debugPrint("Got error, handle with alert box");
+            // plan doesn't have PIN
+            _showNoPin();
+          },).whenComplete(() {
+            LoadingScreen.instance().hide();
           },);
+
+          // ensure PIN is exists
+          if (pinExists) {
+            await MyClipboard.copyToClipboard(
+              text: Uri.base.toString()
+            ).then((_) {
+              Log.success(message: "🌍 URL copied to the clipboard");
+              _showSuccessCopy();
+            }).onError((error, stackTrace) {
+              Log.error(message: "🌍 Unable to copied to the clipboard");
+              _showFailedCopy(url: Uri.base.host);
+            },);
+          }
         }),
         icon: const Icon(
           LucideIcons.share,
@@ -221,39 +277,45 @@ class _PlanViewPageState extends State<PlanViewPage> {
     // first check whether we login or not?
     _isLogin = await UserStorage.isLogin();
 
-    // TODO: instead of checking is login first, check whether we have this UID in secure storage or not
-    // check if jwtToken is empty or not?
-    if (!_isLogin) {
-      // check if we have secured PIN?
-      String pinData = await SecureBox.get(key: _planUid);
+    // then check if we have secured PIN?
+    String pinData = await SecureBox.get(key: _planUid);
 
-      // if this secured pin is empty then it means that the user doesn't have
-      // credentials to check this Plan, just return false.
-      if (pinData.isEmpty) {
-        return false;
+    // if this secured pin is empty then it means that the user doesn't have
+    // credentials to check this Plan, just return false.
+    if (pinData.isEmpty) {
+      // check if jwtToken is empty or not?
+      if (!_isLogin) {
+        throw Exception('No authentication token or secure PIN available');
       }
-      else {
-        // convert the pin data to PIN verify model
-        PinVerifyModel pin = PinVerifyModel.fromJson(jsonDecode(pinData));
-        securedPin = pin.pin;
-      }
+    }
+    else {
+      // convert the pin data to PIN verify model
+      PinVerifyModel pin = PinVerifyModel.fromJson(jsonDecode(pinData));
+      securedPin = pin.pin;
     }
 
     // log info
     Log.info(message: "🖥️ Get plan data for $_planUid");
     
     // call the Plan API to get the plan data
-    await PlanAPI.findSecure(
-      uid: _planUid,
-      pin: securedPin
-    ).then((result) {
-      _planData = result;
+    await Future.microtask(() async {
+      Log.info(message: "🖥️ Get plan detail");
+      // get the plan data first
+      await PlanAPI.findSecure(
+        uid: _planUid,
+        pin: securedPin
+      ).then((result) {
+        _planData = result;
+      },);
 
+      //TODO: to get the rest of the API
+    },).then((_) {
       // calculate all the necessary data for plan view
+      // TODO: to add also number of participant
       _maxAmount = (MyDateUtils.monthDifference(
         startDate: _planData.startDate,
         endDate: _planData.endDate
-      )) * _planData.amount;
+      )) * _planData.amount * _planData.participations.length;
     },);
     
     return true;
@@ -274,8 +336,37 @@ class _PlanViewPageState extends State<PlanViewPage> {
           uid: _planUid,
           date: date,
           isLogin: _isLogin,
+          participation: _planData.participations,
+          contributions: (_planData.contributions![Globals.dfyyyyMMdd.format(date)] ?? []),
         );
       },
+    );
+  }
+
+  Future <void> _showSuccessCopy() async {
+    return MyDialog.showAlert(
+      context: context,
+      text: "Url copied to the clipboard. You can paste and share it to your friends.\nDon't forget to also give them the PIN.",
+      okayColor: MyColor.primaryColor,
+      okayLabel: "Ok",
+    );
+  }
+
+  Future <void> _showFailedCopy({required String url}) async {
+    return MyDialog.showAlert(
+      context: context,
+      text: "Unable access clipboard, please ask your friend to manually visit $url, and input $_planUid to access the Plan.\nDon't forget to also input the correct PIN for the plan.",
+      okayColor: MyColor.errorColor,
+      okayLabel: "Ok",
+    );
+  }
+
+  Future <void> _showNoPin() async {
+    return MyDialog.showAlert(
+      context: context,
+      text: "Unable to copy URL, please ensure the PIN for the plan already set before share the plan to public.",
+      okayColor: MyColor.errorColor,
+      okayLabel: "Ok",
     );
   }
 

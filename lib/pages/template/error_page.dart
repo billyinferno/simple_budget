@@ -6,10 +6,12 @@ import 'package:simple_budget/_index.g.dart';
 class ErrorTemplatePage extends StatefulWidget {
   final String title;
   final String message;
+  final Function(void)? refresh;
   const ErrorTemplatePage({
     super.key,
     required this.title,
     required this.message,
+    this.refresh,
   });
 
   @override
@@ -109,6 +111,39 @@ class _ErrorTemplatePageState extends State<ErrorTemplatePage> {
                     ],
                   )
                 ),
+                Visibility(
+                  visible: (widget.refresh != null),
+                  child: const SizedBox(height: 10,)
+                ),
+                Visibility(
+                  visible: (widget.refresh != null),
+                  child:  MyButton(
+                    color: MyColor.primaryColorDark,
+                    onTap: (() {
+                      if (widget.refresh != null) {
+                        widget.refresh!;
+                      }
+                    }),
+                    child: const Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Icon(
+                          LucideIcons.refresh_cw,
+                          size: 12,
+                          color: Colors.white,
+                        ),
+                        SizedBox(width: 10,),
+                        Text(
+                          "Refresh",
+                          style: TextStyle(
+                            color: Colors.white
+                          ),
+                        ),
+                      ],
+                    )
+                  ),
+                )
               ],
             ),
           ),

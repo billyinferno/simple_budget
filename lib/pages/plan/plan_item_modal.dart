@@ -6,12 +6,15 @@ class PlanItemModal extends StatefulWidget {
   final String uid;
   final DateTime date;
   final bool isLogin;
-  //TODO: add the list of the participant data for this plan and date
+  final List<ParticipationModel> participation;
+  final List<ContributionModel> contributions;
   const PlanItemModal({
     super.key,
     required this.uid,
     required this.date,
     required this.isLogin,
+    required this.participation,
+    required this.contributions,
   });
 
   @override
@@ -20,10 +23,16 @@ class PlanItemModal extends StatefulWidget {
 
 class _PlanItemModalState extends State<PlanItemModal> {
   final ScrollController _scrollController = ScrollController();
+  late Map<int, bool> _contributionsMap;
 
   @override
   void initState() {
-    // TODO: implement initState
+    // initialize contribution map as {}
+    _contributionsMap = {};
+
+    // generate the contributions map
+    _generateContributionMap();
+
     super.initState();
   }
 
@@ -51,7 +60,7 @@ class _PlanItemModalState extends State<PlanItemModal> {
               children: <Widget>[
                 Expanded(
                   child: Text(
-                    "View Plan for ${Globals.dfyyyyMMdd.format(widget.date)}",
+                    Globals.dfyyMon.format(widget.date),
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
@@ -82,12 +91,11 @@ class _PlanItemModalState extends State<PlanItemModal> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.start,
-                  children: List<Widget>.generate(20, (index) {
-                    //TODO: to generate the correct data for participant
+                  children: List<Widget>.generate(widget.participation.length, (index) {
                     return MyUserList(
                       uid: widget.uid,
                       date: widget.date,
-                      name: "Nama Teman",
+                      name: widget.participation[index].name,
                       paid: (index % 3 == 0 ? true : false),
                       enableSlide: widget.isLogin,
                       onAdd: (() async {
@@ -108,5 +116,18 @@ class _PlanItemModalState extends State<PlanItemModal> {
         ],
       ),
     );
+  }
+
+  void _generateContributionMap() {
+    // loop thru participations first to generate the map
+    for(int i=0; i<widget.participation.length; i++) {
+      _contributionsMap[widget.participation[i].id] = false;
+    }
+
+    // now loop thru contributions and set the one that already contribute
+    // into true
+    for(int i=0; i<widget.contributions.length; i++) {
+      _contributionsMap[widget.contributions[i].participationId] = true;
+    }
   }
 }
