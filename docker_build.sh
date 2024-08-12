@@ -19,11 +19,11 @@ echo current tag is $tag
 
 # then tag the latest docker image to the current tag
 echo tag latest image to $tag
-docker image tag adimartha/simple_budger:latest adimartha/simple_budger:$tag
+docker image tag adimartha/simple_budget:latest adimartha/simple_budget:$tag
 
 # push both of the image to the docker repo
 echo push latest docker image
-docker image push adimartha/simple_budger:latest
+docker image push adimartha/simple_budget:latest
 
 echo push $tag docker image
-docker image push adimartha/simple_budger:$tag
+docker image push adimartha/simple_budget:$tag
