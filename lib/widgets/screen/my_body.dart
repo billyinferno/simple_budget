@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 
 class MyBody extends StatelessWidget {
-  final Widget child;
+  final Widget? child;
   final EdgeInsetsGeometry? padding;
+  final Widget? overrideWidget;
   const MyBody({
     super.key,
-    required this.child,
+    this.child,
     this.padding,
+    this.overrideWidget,
   });
 
   @override
@@ -16,11 +18,11 @@ class MyBody extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.start,
       children: <Widget>[
         Expanded(
-          child: Container(
+          child: (overrideWidget ?? Container(
             width: double.infinity,
             padding: (padding ?? const EdgeInsets.fromLTRB(10, 0, 10, 80)),
-            child: child,
-          ),
+            child: (child ?? const SizedBox.shrink()),
+          )),
         ),
       ],
     );

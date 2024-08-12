@@ -18,6 +18,7 @@ class PlanModel {
     final String description;
     final double amount;
     final bool readOnly;
+    final String pin;
     final List<ParticipationModel> participations;
     final Map<String, List<ContributionModel>>? contributions;
 
@@ -29,6 +30,7 @@ class PlanModel {
         required this.description,
         required this.amount,
         required this.readOnly,
+        required this.pin,
         required this.participations,
         this.contributions,
     });
@@ -41,6 +43,7 @@ class PlanModel {
         description: (json["description"] ?? ''),
         amount: (json["amount"] == null ? 0 : json["amount"]?.toDouble()),
         readOnly: (json["readOnly"] ?? true),
+        pin: json["pin"],
         participations: List<ParticipationModel>.from(json["participations"].map((x) => ParticipationModel.fromJson(x))),
         contributions: (json["contributions"] == null ? {} : Map.from(json["contributions"]).map((k, v) => MapEntry<String, List<ContributionModel>>(k, List<ContributionModel>.from(v.map((x) => ContributionModel.fromJson(x)))))),
     );
@@ -53,6 +56,7 @@ class PlanModel {
         "description": description,
         "amount": amount,
         "readOnly": readOnly,
+        "pin": pin,
         "participations": List<dynamic>.from(participations.map((x) => x.toJson())),
         "contributions": (contributions == null ? "{}" : Map.from(contributions!).map((k, v) => MapEntry<String, dynamic>(k, List<dynamic>.from(v.map((x) => x.toJson()))))),
     };

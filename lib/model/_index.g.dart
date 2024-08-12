@@ -7,6 +7,7 @@ export './participation/participation_model.dart';
 
 export './plan/plan_pin_verify_model.dart';
 export './plan/plan_model.dart';
+export './plan/plan_uid_model.dart';
 
 export './user/user_login_info_model.dart';
 export './user/user_login_model.dart';

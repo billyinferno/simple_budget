@@ -16,8 +16,16 @@ class Globals {
 
   static String apiAuthLocal = '$apiURL/api/auth/local';
   static String apiUserMe = '$apiURL/api/users/me';
+  static String apiPlan = '$apiURL/api/plans';
+  static String apiPlanDelete = '$apiURL/api/plans/delete';
+  static String apiPlanUpdate = '$apiURL/api/plans/update';
   static String apiPlanPinVerify = '$apiURL/api/plans/pin/verify';
+  static String apiPlanPinCreate = '$apiURL/api/plans/pin/create';
+  static String apiPlanPinDelete = '$apiURL/api/plans/pin/delete';
   static String apiPlanCheck = '$apiURL/api/plans/check';
   static String apiPlanFind = '$apiURL/api/plans/findSecure';
   static String apiPlanList = '$apiURL/api/plans/list';
+  static String apiPlanGenerate = '$apiURL/api/plans/generate';
+  static String apiContributionCreate = '$apiURL/api/contributions/add';
+  static String apiContributionDelete = '$apiURL/api/contributions/delete';
 }

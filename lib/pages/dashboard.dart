@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:go_router/go_router.dart';
+import 'package:http/http.dart';
 import 'package:simple_budget/_index.g.dart';
 
 class DashboardPage extends StatefulWidget {
@@ -155,16 +156,24 @@ class _DashboardPageState extends State<DashboardPage> {
           }
         }),
       ),
-      body: MyBody(
-        padding: const EdgeInsets.fromLTRB(0, 0, 0, 80),
-        child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: _itemList(),
-          ),
-        )
+      body: RefreshIndicator(
+        color: MyColor.primaryColorDark,
+        onRefresh: () async {
+          setState(() {
+            _getData = _getPlanList();
+          });
+        },
+        child: MyBody(
+          padding: const EdgeInsets.fromLTRB(0, 0, 0, 80),
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: _itemList(),
+            ),
+          )
+        ),
       ),
     );
   }
@@ -184,7 +193,7 @@ class _DashboardPageState extends State<DashboardPage> {
             SlidableAction(
               onPressed: (context) async {
                 // go to the edit plan page
-                context.go('/plan/${_plans[i].uid}/edit');
+                context.go('/plan/edit', extra: _plans[i]);
               },
               icon: LucideIcons.pencil,
               backgroundColor: MyColor.primaryColorDark,
@@ -192,8 +201,19 @@ class _DashboardPageState extends State<DashboardPage> {
               label: "Edit",
             ),
             SlidableAction(
-              onPressed: (context) {
-                //TODO: remove the plan
+              onPressed: (context) async {
+                // show dialog confirmation whether user want to delete the
+                // plan or not first
+                await MyDialog.showConfirmation(
+                  context: context,
+                  text: "Do you want to delete Plan ${_plans[i].uid}?",
+                  okayColor: MyColor.errorColor,
+                  cancelColor: MyColor.backgroundColor,
+                ).then((result) async {
+                  if (result ?? false) {
+                    await _deletePlan(index: i, uid: _plans[i].uid);
+                  }
+                },);
               },
               icon: LucideIcons.trash,
               backgroundColor: MyColor.errorColor,
@@ -277,11 +297,86 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   Future<bool> _getPlanList() async {
+    Log.info(message: "🖥️ Get plan list for user");
+    
     // call the Plan API to get the plan list for this user
     await PlanAPI.getPlanList().then((plans) {
+      Log.success(message: "🖥️ Get plan list for user success");
       _plans = plans;
     },);
 
     return true;
+  }
+
+  Future<void> _deletePlan({
+    required int index,
+    required String uid
+  }) async {
+    // check the error occured during delete
+    try {
+      // show the loading screen
+      LoadingScreen.instance().show(context: context);
+
+      // log the message
+      Log.info(message: "🗑️ Delete plan $uid");
+
+      // call the Plan API to delete the plan
+      await PlanAPI.deletePlan(uid: uid).then((plan) {
+        Log.success(message: "🗑️ Delete plan $uid success");
+
+        // remove the plan from the plan list
+        setState(() {
+          // remove the plan
+          _plans.removeAt(index);
+        });
+      },).whenComplete(() {
+        LoadingScreen.instance().hide();
+      },);
+    }
+    on NetException catch(netError, stackTrace) {
+      Log.error(
+        message: "❌ Error when delete $uid with error ${netError.message}",
+        error: netError,
+        stackTrace: stackTrace,
+      );
+
+      if (mounted) {
+        MyDialog.showAlert(
+          context: context,
+          text: "Error ${netError.message} when delete plan.",
+          okayColor: MyColor.errorColor,
+        );
+      }
+    }
+    on ClientException catch(clientError, stackTrace) {
+      Log.error(
+        message: "❌ Error when delete $uid with error ${clientError.message}",
+        error: clientError,
+        stackTrace: stackTrace,
+      );
+
+      if (mounted) {
+        MyDialog.showAlert(
+          context: context,
+          text: "Error ${clientError.message} when delete plan.",
+          okayColor: MyColor.errorColor,
+        );
+      }
+    }
+    catch (error, stackTrace) {
+      Log.error(
+        message: "❌ Error when delete $uid with errror ${error.toString()}",
+        error: error,
+        stackTrace: stackTrace,
+      );
+
+      if (mounted) {
+        MyDialog.showAlert(
+          context: context,
+          text: "Error processing on the application when delete plan.",
+          okayColor: MyColor.errorColor,
+        );
+      }
+    }
   }
 }

@@ -18,6 +18,8 @@ class PlanViewPage extends StatefulWidget {
 }
 
 class _PlanViewPageState extends State<PlanViewPage> {
+  final ScrollController _scrollController = ScrollController();
+
   late String _planUid;
   late PlanModel _planData;
   late bool _isLogin;
@@ -46,6 +48,12 @@ class _PlanViewPageState extends State<PlanViewPage> {
   }
 
   @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return FutureBuilder(
       future: _getData,
@@ -71,7 +79,9 @@ class _PlanViewPageState extends State<PlanViewPage> {
               title: "Unable to get plan $_planUid",
               message: error.message,
               refresh: (() async {
-                _getData = _getPlanData();
+                setState(() {
+                  _getData = _getPlanData();
+                });
               }),
             );
           }
@@ -97,15 +107,17 @@ class _PlanViewPageState extends State<PlanViewPage> {
         leading: _leadingAppBar(),
         actions: _actionAppBar(),
       ),
-      body: MyBody(
-        padding: const EdgeInsets.fromLTRB(10, 0, 10, 20),
-        child: RefreshIndicator(
-          color: MyColor.primaryColorDark,
-          backgroundColor: MyColor.backgroundColor,
-          onRefresh: () async {
+      body: RefreshIndicator(
+        color: MyColor.primaryColorDark,
+        onRefresh: () async {
+          setState(() {            
             _getData = _getPlanData();
-          },
+          });
+        },
+        child: MyBody(
+          padding: const EdgeInsets.fromLTRB(10, 0, 10, 20),
           child: SingleChildScrollView(
+            controller: _scrollController,
             physics: const AlwaysScrollableScrollPhysics(),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -155,8 +167,8 @@ class _PlanViewPageState extends State<PlanViewPage> {
                   child: const SizedBox(height: 10,)
                 ),
                 MyMonthCalendar(
-                  startDate: DateTime(2024, 7, 1),
-                  endDate: DateTime(2025, 7, 1),
+                  startDate: _planData.startDate,
+                  endDate: _planData.endDate,
                   payment: _paymentData,
                   onTap: (date) async {
                     if (
@@ -165,9 +177,6 @@ class _PlanViewPageState extends State<PlanViewPage> {
                     ) {
                       await _showPlanModal(date: date);
                     }
-                  },
-                  onDoubleTap: (date) {
-                    context.go('/plan/$_planUid/item/${Globals.dfyyyyMMdd.format(date)}');
                   },
                 ),
                 const SizedBox(height: 20,),
@@ -181,8 +190,8 @@ class _PlanViewPageState extends State<PlanViewPage> {
                 ),
               ],
             ),
-          ),
-        )
+          )
+        ),
       ),
     );
   }
@@ -194,7 +203,7 @@ class _PlanViewPageState extends State<PlanViewPage> {
           context.go('/dashboard');
         },
         icon: const Icon(
-          LucideIcons.arrow_left,
+          LucideIcons.chevron_left,
           color: Colors.white,
         )
       );
@@ -234,7 +243,7 @@ class _PlanViewPageState extends State<PlanViewPage> {
       ret.add(
         IconButton(
           onPressed: () {
-            context.go('/plan/$_planUid/edit');
+            context.go('/plan/edit', extra: _planData);
           },
           icon: const Icon(
             LucideIcons.pencil,
@@ -242,50 +251,134 @@ class _PlanViewPageState extends State<PlanViewPage> {
           )
         )
       );
-    }
 
-    // add the URL copy
-    ret.add(
-      IconButton(
-        onPressed: (() async {
-          // default the pin exists into false, assuming that the plan doesn't
-          // have any PIN set yet.
-          bool pinExists = false;
+      // check if pin already setup or not?
+      if (_planData.pin.isNotEmpty) {
+        ret.add(
+          IconButton(
+            onPressed: () async {
+              await MyDialog.showConfirmation(
+                context: context,
+                text: "Do you want to remove PIN for $_planUid?",
+                okayColor: MyColor.primaryColorDark,
+                cancelColor: MyColor.backgroundColor,
+              ).then((result) async {
+                if (result ?? false) {
+                  try {                    
+                    await _deletePin();
+                  }
+                  on NetException catch (netError, stackTrace) {
+                    Log.error(
+                      message: "❌ ${netError.message}",
+                      error: netError,
+                      stackTrace: stackTrace,
+                    );
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        createSnackBar(message: netError.message)
+                      );
+                    }
+                  }
+                  catch (error, stackTrace) {
+                    Log.error(
+                      message: "❌ ${error.toString()}",
+                      error: error,
+                      stackTrace: stackTrace,
+                    );
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        createSnackBar(message: "Error occured on the application")
+                      );
+                    }
+                  }
+                }
+              });
+            },
+            icon: const Icon(
+              LucideIcons.lock,
+              color: Colors.white,
+            )
+          )
+        );
+      }
+      else {
+        ret.add(
+          IconButton(
+            onPressed: () async {
+              // show general dialog to add PIN
+              await showGeneralDialog(
+                barrierColor: Colors.black.withOpacity(0.9),
+                context: context,
+                transitionBuilder: _bottomToTopTransition,
+                transitionDuration: const Duration(milliseconds: 200),
+                pageBuilder: (context, animation, secondaryAnimation) {
+                  return PlanPINCreateModal(
+                    uid: _planUid
+                  );
+                },
+              ).then((pop) async {
+                String pin = pop as String;
+                // check if result is not empty
+                if (pin.isNotEmpty) {
+                  // PIN is set we can call the function to set PIN for this
+                  try {                    
+                    await _setPin(
+                      uid: _planUid,
+                      pin: pin,
+                    );
+                  }
+                  on NetException catch (netError, stackTrace) {
+                    Log.error(
+                      message: "❌ ${netError.message}",
+                      error: netError,
+                      stackTrace: stackTrace,
+                    );
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        createSnackBar(message: netError.message)
+                      );
+                    }
+                  }
+                  catch (error, stackTrace) {
+                    Log.error(
+                      message: "❌ ${error.toString()}",
+                      error: error,
+                      stackTrace: stackTrace,
+                    );
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        createSnackBar(message: "Error occured on the application")
+                      );
+                    }
+                  }
+                }
+              },);
+            },
+            icon: const Icon(
+              LucideIcons.lock_open,
+              color: Colors.white,
+            )
+          )
+        );
+      }
 
-          // show loading screen
-          LoadingScreen.instance().show(context: context);
-
-          // check and ensure the PIN is already set for this
-          await PlanAPI.check(uid: _planUid).then((check) async {
-            pinExists = check;
-          }).onError((error, stackTrace) {
-            // plan doesn't have PIN
-            _showNoPin();
-          },).whenComplete(() {
-            LoadingScreen.instance().hide();
-          },);
-
-          // ensure PIN is exists
-          if (pinExists) {
-            await MyClipboard.copyToClipboard(
-              text: Uri.base.toString()
-            ).then((_) {
-              Log.success(message: "🌍 URL copied to the clipboard");
-              _showSuccessCopy();
-            }).onError((error, stackTrace) {
-              Log.error(message: "🌍 Unable to copied to the clipboard");
-              _showFailedCopy(url: Uri.base.host);
-            },);
-          }
-        }),
-        icon: const Icon(
-          LucideIcons.share,
-          color: MyColor.backgroundColor,
+      // add the URL copy
+      ret.add(
+        IconButton(
+          onPressed: (() async {
+            // default the pin exists into false, assuming that the plan doesn't
+            // have any PIN set yet.
+            await _copyPlanURL();
+          }),
+          icon: const Icon(
+            LucideIcons.share,
+            color: MyColor.backgroundColor,
+          )
         )
-      )
-    );
+      );
 
-    ret.add(const SizedBox(width: 10,));
+      ret.add(const SizedBox(width: 10,));
+    }
 
     return ret;
   }
@@ -330,16 +423,13 @@ class _PlanViewPageState extends State<PlanViewPage> {
     Log.info(message: "🖥️ Get plan data for $_planUid");
     
     // call the Plan API to get the plan data
-    await Future.microtask(() async {
-      Log.info(message: "🖥️ Get plan detail");
-      // get the plan data first
-      await PlanAPI.findSecure(
-        uid: _planUid,
-        pin: securedPin
-      ).then((result) {
-        _planData = result;
-      },);
-    },).then((_) {
+    Log.info(message: "🖥️ Get plan detail");
+    // get the plan data first
+    await PlanAPI.findSecure(
+      uid: _planUid,
+      pin: securedPin
+    ).then((result) {
+      _planData = result;
       _calculateData();
     },).onError((error, stackTrace) {
       Log.error(
@@ -367,6 +457,10 @@ class _PlanViewPageState extends State<PlanViewPage> {
       endDate: _planData.endDate
     )) * _planData.amount * _planData.participations.length;
 
+    // clear the payment data first
+    _paymentData.clear();
+    _currentAmount = 0;
+    
     // calculate the current amount
     // we can do this by loop thru the contributon map, whil we doing this
     // we can also generate the payment map data based on the contributions
@@ -391,11 +485,6 @@ class _PlanViewPageState extends State<PlanViewPage> {
     }
   }
 
-  Future<void> _getPlanItem({required DateTime date}) async {
-    // TODO: perform API call to get item here
-    Log.info(message: "🖥️ Get plan item for $date");
-  }
-
   Future<void> _showPlanModal({required DateTime date}) async {
     await showModalBottomSheet(
       isDismissible: false,
@@ -410,7 +499,14 @@ class _PlanViewPageState extends State<PlanViewPage> {
           contributions: (_planData.contributions![Globals.dfyyyyMMdd.format(date)] ?? []),
         );
       },
-    );
+    ).then((result) {
+      if (result && !_planData.readOnly) {
+        // get the data again
+        setState(() {        
+          _getData = _getPlanData();
+        });
+      }
+    },);
   }
 
   Future <void> _showSuccessCopy() async {
@@ -440,12 +536,174 @@ class _PlanViewPageState extends State<PlanViewPage> {
     );
   }
 
-  Future<void> _showErrorPlanItem({required String uid, required DateTime date}) async {
-    return MyDialog.showAlert(
-      context: context,
-      text: "Unable to get Plan Item date ${Globals.dfyyyyMMdd.format(date)} for Plan UID $uid.\nThis is might be due to error on the backend service or your internet is not available, please try again in a few minutes.",
-      okayLabel: "Ok",
-      okayColor: MyColor.errorColor,
+  Widget _bottomToTopTransition(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    var begin = const Offset(0.0, 1.0);
+    var end = Offset.zero;
+    var tween = Tween(begin: begin, end: end);
+    var offsetAnimation = animation.drive(tween);
+    return SlideTransition(
+      position: offsetAnimation,
+      child: child,
     );
+  }
+
+  Future<void> _copyPlanURL() async {
+    bool pinExists = false;
+
+    try {
+      // show loading screen
+      LoadingScreen.instance().show(context: context);
+
+      // check and ensure the PIN is already set for this
+      await PlanAPI.check(uid: _planUid).then((check) async {
+        pinExists = check;
+      }).whenComplete(() {
+        LoadingScreen.instance().hide();
+      },);
+
+      // ensure PIN is exists
+      if (pinExists) {
+        await MyClipboard.copyToClipboard(
+          text: 'You can visit ${Uri.base.scheme}://${Uri.base.host}${Uri.base.hasPort ? ":${Uri.base.port}" : ""}, press View tab and put below id $_planUid, after that press VIEW and input the PIN.'
+        ).then((_) {
+          Log.success(message: "🌍 URL copied to the clipboard");
+          _showSuccessCopy();
+        }).onError((error, stackTrace) {
+          Log.error(message: "🌍 Unable to copied to the clipboard");
+          _showFailedCopy(url: Uri.base.host);
+        },);
+      }
+    }
+    on NetException catch(netError, stackTrace) {
+      // check if the error is due to 404
+      if (netError.code == 404) {
+        // plan doesn't have PIN
+        _showNoPin();
+      }
+      else {
+        Log.error(
+          message: (netError.body ?? "Unknown error from server"),
+          error: netError,
+          stackTrace: stackTrace,
+        );
+
+        // show error dialog
+        if (mounted) {
+          MyDialog.showAlert(
+            context: context,
+            text: "Error ${netError.message} from backend.",
+            okayColor: MyColor.errorColor,
+          );
+        }
+      }
+    }
+    catch (error, stackTrace) {
+      Log.error(
+        message: (error.toString()),
+        error: error,
+        stackTrace: stackTrace,
+      );
+      
+      // show error dialog
+      if (mounted) {
+        MyDialog.showAlert(
+          context: context,
+          text: "Error occured oin the applicatin.",
+          okayColor: MyColor.errorColor,
+        );
+      }
+    }
+  }
+
+  Future<void> _deletePin() async {
+    // show loading screen
+    LoadingScreen.instance().show(context: context);
+    
+    // call Plan API to remove the PIN
+    await PlanAPI.deletePin(uid: _planUid).then((_) {
+      // recreate the _planData instead of calling again the
+      // findSecure API as we just need to remove the PIN data
+      final PlanModel newPLan = PlanModel(
+        uid: _planData.uid,
+        name: _planData.name,
+        startDate: _planData.startDate,
+        endDate: _planData.endDate,
+        description: _planData.description,
+        amount: _planData.amount,
+        readOnly: _planData.readOnly,
+        pin: '',
+        participations: _planData.participations,
+        contributions: _planData.contributions,
+      );
+
+      // set the _planData with newPlan
+      setState(() {
+        _planData = newPLan;
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          createSnackBar(
+            message: "PIN removed",
+            icon: const Icon(
+              LucideIcons.check,
+              color: MyColor.backgroundColor,
+              size: 20,
+            )
+          )
+        );
+      }
+    }).whenComplete(() {
+      // remove loading screen
+      LoadingScreen.instance().hide();
+    },);
+  }
+
+  Future<void> _setPin({required String uid, required String pin}) async {
+    // show loading screen
+    LoadingScreen.instance().show(context: context);
+    
+    await PlanAPI.createPin(
+      uid: uid,
+      pin: pin
+    ).then((result) {
+      // PIN creation success
+      // recreate the _planData instead of calling again the
+      // findSecure API as we just need to add the PIN data
+      final PlanModel newPLan = PlanModel(
+        uid: _planData.uid,
+        name: _planData.name,
+        startDate: _planData.startDate,
+        endDate: _planData.endDate,
+        description: _planData.description,
+        amount: _planData.amount,
+        readOnly: _planData.readOnly,
+        pin: result.pin,
+        participations: _planData.participations,
+        contributions: _planData.contributions,
+      );
+
+      // set the _planData with newPlan
+      setState(() {
+        _planData = newPLan;
+      });
+
+      // show success dialog
+      if (mounted) {
+        MyDialog.showAlert(
+          context: context,
+          title: "PIN Setup",
+          text: "PIN successfully setup for Plan $uid",
+          okayColor: MyColor.primaryColor,
+        );
+      }
+    },).whenComplete(() {
+      LoadingScreen.instance().hide();
+    },);
   }
 }

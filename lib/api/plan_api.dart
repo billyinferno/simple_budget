@@ -57,7 +57,7 @@ class PlanAPI {
       requiredJWT: requiredJwt,
     );
 
-    // parse the response to get watchlist information that we just added
+    // parse the response to get plan information that we got
     CommonSingleModel commonModel = CommonSingleModel.fromJson(jsonDecode(result));
     PlanModel plan = PlanModel.fromJson(commonModel.data['attributes']);
 
@@ -70,7 +70,7 @@ class PlanAPI {
       url: Globals.apiPlanList
     );
 
-    // parse the response to get the sector name list
+    // parse the response to get the plan list that we got
     CommonArrayModel commonModel = CommonArrayModel.fromJson(jsonDecode(body));
     List<PlanModel> plans = [];
     for (var data in commonModel.data) {
@@ -78,5 +78,129 @@ class PlanAPI {
       plans.add(plan);
     }
     return plans;
+  }
+
+  static Future<PinVerifyModel> createPin({
+    required String uid,
+    required String pin
+  }) async {
+    final String body = await NetUtils.post(
+      url: Globals.apiPlanPinCreate,
+      body: {
+        "uid":uid,
+        "pin":pin
+      },
+    );
+
+    // parse the response to the pin that we set for this plan
+    CommonSingleModel commonModel = CommonSingleModel.fromJson(jsonDecode(body));
+    PinVerifyModel plan = PinVerifyModel.fromJson(commonModel.data['attributes']);
+
+    return plan;
+  }
+
+  static Future<void> deletePin({required String uid}) async {
+    await NetUtils.post(
+      url: Globals.apiPlanPinDelete,
+      body: {
+        "uid":uid
+      },
+    );
+  }
+
+  static Future<PlanUidModel> generateUid() async {
+    final String body = await NetUtils.get(
+      url: Globals.apiPlanGenerate,
+    );
+
+    // parse the response to the uid data
+    CommonSingleModel commonModel = CommonSingleModel.fromJson(jsonDecode(body));
+    PlanUidModel plan = PlanUidModel.fromJson(commonModel.data['attributes']);
+
+    return plan;
+  }
+
+  static Future<bool> createPlan({
+    required String uid,
+    required String name,
+    required String description,
+    required DateTime startDate,
+    required DateTime endDate,
+    required double amount,
+    required String pin,
+    required List<String> participants,
+  }) async {
+    bool retValue = false;
+
+    await NetUtils.post(
+      url: Globals.apiPlan,
+      body: {
+        "uid": uid,
+        "name": name,
+        "description": description,
+        "startDate": Globals.dfyyyyMMdd.format(startDate),
+        "endDate": Globals.dfyyyyMMdd.format(endDate),
+        "amount": amount,
+        "pin": pin,
+        "participants": participants
+      },
+    ).then((value) {
+      retValue = true;
+    },);
+
+    return retValue;
+  }
+
+  static Future<void> deletePlan({required String uid}) async {
+    await NetUtils.post(
+      url: Globals.apiPlanDelete,
+      body: {
+        "uid":uid
+      },
+    );
+  }
+
+  static Future<bool> updatePlan({
+    required String uid,
+    required String name,
+    required String description,
+    required DateTime startDate,
+    required DateTime endDate,
+    required double amount,
+    required Map<ParticipationModel, EditType> participants,
+  }) async {
+    bool retValue = false;
+    List<int> delete = [];
+    List<String> add = [];
+
+    // loop thru participants to get which one to delete and which one to add
+    participants.forEach((participant, edit) {
+      if (edit == EditType.delete) {
+        delete.add(participant.id);
+      }
+      else if (edit == EditType.add) {
+        add.add(participant.name);
+      }
+    },);
+
+    await NetUtils.post(
+      url: Globals.apiPlanUpdate,
+      body: {
+        "uid": uid,
+        "name": name,
+        "description": description,
+        "startDate": Globals.dfyyyyMMdd.format(startDate),
+        "endDate": Globals.dfyyyyMMdd.format(endDate),
+        "amount": amount,
+        "participants": {
+          "delete": delete,
+          "add": add
+        }
+      },
+    ).then((value) {
+      retValue = true;
+    },);
+
+    return retValue;
   }
 }

@@ -50,7 +50,7 @@ class MyBarChart extends StatelessWidget {
               ),
               Expanded(
                 flex: (maxValue - value),
-                child: SizedBox(),
+                child: const SizedBox(),
               ),
             ],
           ),

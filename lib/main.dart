@@ -28,7 +28,6 @@ void main() async {
 
       // run the application
       Log.success(message: "💯 Run application");
-      runApp(const MyApp());
     }).onError((error, stackTrace) {
       Log.error(
         message: "❌ Error when perform app init",
@@ -36,6 +35,9 @@ void main() async {
         stackTrace: stackTrace
       );
     },);
+
+    // run the app inside the run zone guarded instead
+    runApp(const MyApp());
   },
   (error, stack) {
     Log.error(

@@ -66,6 +66,13 @@ class _RouterPageState extends State<RouterPage> with TickerProviderStateMixin {
           },
         ),
         GoRoute(
+          name: 'plan-edit',
+          path: '/plan/edit',
+          builder: (context, state) {
+            return PlanEditPage(plan: state.extra,);
+          },
+        ),
+        GoRoute(
           path: '/plan/:uid',
           builder: (context, state) {
             final String uid = (state.pathParameters["uid"] ?? '');
@@ -79,22 +86,6 @@ class _RouterPageState extends State<RouterPage> with TickerProviderStateMixin {
               return PlanViewPage(uid: uid,);
             }
           },
-          routes: <RouteBase>[
-            GoRoute(
-              path: 'edit',
-              builder: (context, state) {
-                final String uid = (state.pathParameters["uid"] ?? '');
-                return PlanEditPage(uid: uid);
-              },
-            ),
-            GoRoute(
-              path: 'item/:date',
-              builder: (context, state) {
-                final String date = (state.pathParameters["date"] ?? '');
-                return PlanItemPage(date: date,);
-              },
-            ),
-          ],
         ),
       ],
       errorBuilder: (context, state) {
@@ -121,14 +112,15 @@ class _RouterPageState extends State<RouterPage> with TickerProviderStateMixin {
             break;
           case "plan":
             // check the 2nd path
-            // TODO: to check why plan add is not secured with JWT
             if (state.uri.pathSegments.length > 1) {
               String uid = (state.uri.pathSegments[1]).toUpperCase();
               // check if uid is ADD
-              if (uid == "ADD") {
+              if (uid == "ADD" || uid == "EDIT") {
                 isPin = false;
               }
-              isPin = true;
+              else {
+                isPin = true;
+              }
             }
             else {
               isPin = false;

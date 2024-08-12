@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:http/http.dart';
 import 'package:simple_budget/_index.g.dart';
 
 class LoginFormPage extends StatefulWidget {
@@ -95,28 +96,52 @@ class _LoginFormPageState extends State<LoginFormPage> {
     }
 
     // both filled, it means that we can call Login API
-    await UserAPI.login(identifier: identifier, password: password).then((login) async {
-      // user login already, stored the JWT on the secure storage
-      await SecureBox.put(key: 'jwt', value: login.jwt);
+    try {
+      await UserAPI.login(identifier: identifier, password: password).then((login) async {
+        // user login already, stored the JWT on the secure storage
+        await SecureBox.put(key: 'jwt', value: login.jwt);
 
-      // set the NetUtils JWT also
-      NetUtils.setJWT(bearerToken: login.jwt);
+        // set the NetUtils JWT also
+        NetUtils.setJWT(bearerToken: login.jwt);
 
-      // once JWT is put on the secure box and netutils, now put the user
-      // information on the storage.
-      await UserStorage.setUserInfo(login.user);
+        // once JWT is put on the secure box and netutils, now put the user
+        // information on the storage.
+        await UserStorage.setUserInfo(login.user);
 
-      // then we can navigate to dashboard instead
-      if (mounted) {
-        context.go('/dashboard');
-      }
-    },).onError((error, stackTrace) {
-      // set the error as NetException
-      NetException netError = error as NetException;
-
+        // then we can navigate to dashboard instead
+        if (mounted) {
+          context.go('/dashboard');
+        }
+      });
+    }
+    on NetException catch (netError, stackTrace) {
+      Log.error(
+        message: "❌ Got error on the backend",
+        error: netError,
+        stackTrace: stackTrace,
+      );
       // now showed the net error message
       _showSnackBar(errorMessage: netError.error()!.error.message);
-    },);
+    }
+    on ClientException catch (clientError, stackTrace) {
+      Log.error(
+        message: "❌ Client error on the application",
+        error: clientError,
+        stackTrace: stackTrace,
+      );
+      // now showed the net error message
+      _showSnackBar(errorMessage: "Unable to connect to backend API");
+    }
+    catch (error, stackTrace) {
+      // unknown error
+      Log.error(
+        message: "❌ Error ${error.toString()}",
+        error: error,
+        stackTrace: stackTrace,
+      );
+      // now showed the net error message
+      _showSnackBar(errorMessage: "Error occured on the application");
+    }
   }
 
   void _showSnackBar({required String errorMessage}) {

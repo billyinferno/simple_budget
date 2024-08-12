@@ -24,9 +24,13 @@ class PlanItemModal extends StatefulWidget {
 class _PlanItemModalState extends State<PlanItemModal> {
   final ScrollController _scrollController = ScrollController();
   late Map<int, bool> _contributionsMap;
+  late bool _result;
 
   @override
   void initState() {
+    // default result as false
+    _result = false;
+
     // initialize contribution map as {}
     _contributionsMap = {};
 
@@ -72,7 +76,7 @@ class _PlanItemModalState extends State<PlanItemModal> {
                 IconButton(
                   onPressed: (() {
                     // dismiss modal dialog
-                    Navigator.pop(context);
+                    Navigator.pop(context, _result);
                   }),
                   icon: const Icon(
                     LucideIcons.circle_x,
@@ -99,12 +103,52 @@ class _PlanItemModalState extends State<PlanItemModal> {
                       paid: (_contributionsMap[widget.participation[index].id] ?? false),
                       enableSlide: widget.isLogin,
                       onAdd: (() async {
-                        //TODO: to call API to add participation
-                        Log.success(message: '👤 Add participation for "nama teman" on plan ${widget.uid} for ${widget.date}');
+                        await ContributionAPI.create(
+                          uid: widget.uid,
+                          participationId: widget.participation[index].id,
+                          date: widget.date
+                        ).then((_) {
+                          Log.success(message: '👤 Add participation for ${widget.participation[index].name} on plan ${widget.uid} for ${widget.date}');
+
+                          setState(() {
+                            _result = true;
+                            _contributionsMap[widget.participation[index].id] = true;
+                          });
+                        },).onError((error, stackTrace) {
+                          Log.error(
+                            message: "👤 Error when add participation",
+                            error: error,
+                            stackTrace: stackTrace,
+                          );
+
+                          _showAlert(
+                            text: 'Error when add participation for ${widget.participation[index].name} on plan ${widget.uid} for ${widget.date}'
+                          );
+                        },);
                       }),
                       onRemove: (() async {
-                        //TODO: to call API to add participation
-                        Log.success(message: '👤 Remove participation for "nama teman" on plan ${widget.uid} for ${widget.date}');
+                        await ContributionAPI.delete(
+                          uid: widget.uid,
+                          participationId: widget.participation[index].id,
+                          date: widget.date
+                        ).then((_) {
+                          Log.success(message: '👤 Remove participation for ${widget.participation[index].name} on plan ${widget.uid} for ${widget.date}');
+
+                          setState(() {
+                            _result = true;
+                            _contributionsMap[widget.participation[index].id] = false;
+                          });
+                        }).onError((error, stackTrace) {
+                          Log.error(
+                            message: "👤 Error when remove participation",
+                            error: error,
+                            stackTrace: stackTrace,
+                          );
+
+                          _showAlert(
+                            text: 'Error when remove participation for ${widget.participation[index].name} on plan ${widget.uid} for ${widget.date}'
+                          );
+                        },);
                       }),
                     );
                   },),
@@ -129,5 +173,13 @@ class _PlanItemModalState extends State<PlanItemModal> {
     for(int i=0; i<widget.contributions.length; i++) {
       _contributionsMap[widget.contributions[i].participationId] = true;
     }
+  }
+
+  void _showAlert({required String text}) {
+    MyDialog.showAlert(
+      context: context,
+      text: text,
+      okayColor: MyColor.errorColor,
+    );
   }
 }
