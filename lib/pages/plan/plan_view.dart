@@ -309,7 +309,7 @@ class _PlanViewPageState extends State<PlanViewPage> {
               await showGeneralDialog(
                 barrierColor: Colors.black.withOpacity(0.9),
                 context: context,
-                transitionBuilder: _bottomToTopTransition,
+                transitionBuilder: bottomToTopTransition,
                 transitionDuration: const Duration(milliseconds: 200),
                 pageBuilder: (context, animation, secondaryAnimation) {
                   return PlanPINCreateModal(
@@ -533,22 +533,6 @@ class _PlanViewPageState extends State<PlanViewPage> {
       text: "Unable to copy URL, please ensure the PIN for the plan already set before share the plan to public.",
       okayColor: MyColor.errorColor,
       okayLabel: "Ok",
-    );
-  }
-
-  Widget _bottomToTopTransition(
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-    Widget child,
-  ) {
-    var begin = const Offset(0.0, 1.0);
-    var end = Offset.zero;
-    var tween = Tween(begin: begin, end: end);
-    var offsetAnimation = animation.drive(tween);
-    return SlideTransition(
-      position: offsetAnimation,
-      child: child,
     );
   }
 

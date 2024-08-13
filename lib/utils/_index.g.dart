@@ -1,3 +1,5 @@
+export './animation/bottom_to_top_animation.dart';
+
 export './behaviour/my_custom_scroll_behaviour.dart';
 
 export './net/_index.g.dart';

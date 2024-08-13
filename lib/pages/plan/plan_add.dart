@@ -387,11 +387,12 @@ class _PlanAddPageState extends State<PlanAddPage> {
                   const TextSmall(text: "Participants"),
                   IconButton(
                     onPressed: (() async {
-                      await showModalBottomSheet(
+                      await showGeneralDialog(
                         context: context,
-                        isDismissible: false,
-                        backgroundColor: Colors.black.withOpacity(1),
-                        builder: (context) {
+                        barrierColor: Colors.black.withOpacity(1),
+                        transitionBuilder: bottomToTopTransition,
+                        transitionDuration: const Duration(milliseconds: 200),
+                        pageBuilder: (context, animation, secondaryAnimation) {                          
                           return const PlanAddParticipantModal();
                         },
                       ).then((participant) {
