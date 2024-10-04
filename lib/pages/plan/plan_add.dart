@@ -389,7 +389,7 @@ class _PlanAddPageState extends State<PlanAddPage> {
                     onPressed: (() async {
                       await showGeneralDialog(
                         context: context,
-                        barrierColor: Colors.black.withOpacity(1),
+                        barrierColor: Colors.black,
                         transitionBuilder: bottomToTopTransition,
                         transitionDuration: const Duration(milliseconds: 200),
                         pageBuilder: (context, animation, secondaryAnimation) {                          

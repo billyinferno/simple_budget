@@ -67,7 +67,7 @@ class NetUtils {
   /// This is to sending GET request to the API Server
   /// Parameter needed for this are:
   /// - required : url         : String
-  /// - optional : params      : Map<String, dynamic>
+  /// - optional : params      : Map\<String, dynamic\>
   static Future get({
     required String url,
     Map<String, dynamic>? params,
@@ -115,8 +115,8 @@ class NetUtils {
   /// This is to sending POST request to the API Server
   /// Parameter needed for this are:
   /// - required : url         : String
-  /// - optional : params      : Map<String, dynamic>
-  /// - required : body        : Map<String, dynamic>
+  /// - optional : params      : Map\<String, dynamic\>
+  /// - required : body        : Map\<String, dynamic\>
   /// - optional : requiredJWT : bool
   static Future post({
     required String url,
@@ -171,7 +171,7 @@ class NetUtils {
   /// This is to sending DELETE request to the API Server
   /// Parameter needed for this are:
   /// - required : url         : String
-  /// - optional : params      : Map<String, dynamic>
+  /// - optional : params      : Map\<String, dynamic\>
   static Future delete({
     required String url,
     Map<String, dynamic>? params,
@@ -223,8 +223,8 @@ class NetUtils {
   /// This is to sending PATCH request to the API Server
   /// Parameter needed for this are:
   /// - required : url         : String
-  /// - optional : params      : Map<String, dynamic>
-  /// - required : body        : Map<String, dynamic>
+  /// - optional : params      : Map\<String, dynamic\>
+  /// - required : body        : Map\<String, dynamic\>
   static Future patch({
     required String url,
     Map<String, dynamic>? params,
@@ -281,8 +281,8 @@ class NetUtils {
   /// This is to sending PUT request to the API Server
   /// Parameter needed for this are:
   /// - required : url         : String
-  /// - optional : params      : Map<String, dynamic>
-  /// - required : body        : Map<String, dynamic>
+  /// - optional : params      : Map\<String, dynamic\>
+  /// - required : body        : Map\<String, dynamic\>
   static Future put({
     required String url,
     Map<String, dynamic>? params,

@@ -307,7 +307,7 @@ class _PlanViewPageState extends State<PlanViewPage> {
             onPressed: () async {
               // show general dialog to add PIN
               await showGeneralDialog(
-                barrierColor: Colors.black.withOpacity(0.9),
+                barrierColor: Colors.black.withValues(alpha: 0.9),
                 context: context,
                 transitionBuilder: bottomToTopTransition,
                 transitionDuration: const Duration(milliseconds: 200),
@@ -488,7 +488,7 @@ class _PlanViewPageState extends State<PlanViewPage> {
   Future<void> _showPlanModal({required DateTime date}) async {
     await showModalBottomSheet(
       isDismissible: false,
-      barrierColor: Colors.black.withOpacity(0.9),
+      barrierColor: Colors.black.withValues(alpha: 0.9),
       context: context,
       builder: (context) {
         return PlanItemModal(

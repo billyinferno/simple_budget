@@ -322,7 +322,7 @@ class _PlanEditPageState extends State<PlanEditPage> {
                       await showModalBottomSheet(
                         context: context,
                         isDismissible: false,
-                        backgroundColor: Colors.black.withOpacity(1),
+                        backgroundColor: Colors.black,
                         builder: (context) {
                           return const PlanAddParticipantModal();
                         },
