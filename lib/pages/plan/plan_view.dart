@@ -171,12 +171,7 @@ class _PlanViewPageState extends State<PlanViewPage> {
                   endDate: _planData.endDate,
                   payment: _paymentData,
                   onTap: (date) async {
-                    if (
-                      date.toLocal().isBefore(DateTime.now().toLocal()) ||
-                      date.toLocal().isAtSameMomentAs(DateTime.now().toLocal())
-                    ) {
-                      await _showPlanModal(date: date);
-                    }
+                    await _showPlanModal(date: date);
                   },
                 ),
                 const SizedBox(height: 20,),
