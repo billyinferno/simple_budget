@@ -5,7 +5,7 @@ import 'package:simple_budget/_index.g.dart';
 class MyMonthCalendar extends StatelessWidget {
   final DateTime startDate;
   final DateTime endDate;
-  final Map<DateTime, bool> payment;
+  final Map<DateTime, ContributionStatus> payment;
   final Function(DateTime)? onTap;
   final Function(DateTime)? onDoubleTap;
   const MyMonthCalendar({
@@ -86,7 +86,7 @@ class MyMonthCalendar extends StatelessWidget {
         // generate the item month
         return _itemMonth(
           date: calcDate,
-          paid: (payment[calcDate] ?? false)
+          paid: (payment[calcDate] ?? ContributionStatus.none)
         );
       },),
     );
@@ -94,26 +94,35 @@ class MyMonthCalendar extends StatelessWidget {
 
   Widget _itemMonth({
     required DateTime date,
-    required bool paid
+    required ContributionStatus paid
   }) {
     Icon currentIcon;
 
-    // check if the date is more than today date?
-    if (date.isAfter(DateTime.now())) {
+    // check if already paid or not whether this is in future or not?
+    if (paid == ContributionStatus.full) {
       currentIcon = const Icon(
-        LucideIcons.minus,
-        color: MyColor.backgroundColorDark,
+        LucideIcons.check,
+        color: MyColor.primaryColor,
       );
     }
     else {
-      // check if already paid or not?
-      if (paid) {
-        currentIcon = const Icon(
-          LucideIcons.check,
-          color: MyColor.primaryColor,
-        );
+      // check if the date is more than today date?
+      if (date.isAfter(DateTime.now())) {
+        // check if got partial payment or not?
+        if (paid == ContributionStatus.partial) {
+          currentIcon = const Icon(
+            LucideIcons.ungroup,
+            color: MyColor.warningColor,
+          );
+        }
+        else {
+          currentIcon = const Icon(
+            LucideIcons.minus,
+            color: MyColor.backgroundColorDark,
+          );
+        }
       }
-      else {
+      else {  
         currentIcon = const Icon(
           LucideIcons.x,
           color: MyColor.errorColor,

@@ -10,6 +10,9 @@ PlanModel planModelFromJson(String str) => PlanModel.fromJson(json.decode(str));
 
 String planModelToJson(PlanModel data) => json.encode(data.toJson());
 
+enum ContributionStatus {
+  none, full, partial
+}
 class PlanModel {
     final String uid;
     final String name;

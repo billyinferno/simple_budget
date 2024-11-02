@@ -28,7 +28,7 @@ class _PlanViewPageState extends State<PlanViewPage> {
   late int _currentPercentage;
 
   late Future<bool> _getData;
-  late Map<DateTime, bool> _paymentData;
+  late Map<DateTime, ContributionStatus> _paymentData;
 
   @override
   void initState() {
@@ -464,10 +464,15 @@ class _PlanViewPageState extends State<PlanViewPage> {
       DateTime dt = DateTime.parse(date);
 
       if (_planData.contributions![date]!.length == _planData.participations.length) {
-        _paymentData[dt] = true;
+        _paymentData[dt] = ContributionStatus.full;
       }
       else{
-        _paymentData[dt] = false;
+        if (_planData.contributions![date]!.isNotEmpty) {
+          _paymentData[dt] = ContributionStatus.partial;
+        }
+        else {
+          _paymentData[dt] = ContributionStatus.none;
+        }
       }
 
       // calculate the current amount
