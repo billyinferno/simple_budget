@@ -175,6 +175,111 @@ class _PlanViewPageState extends State<PlanViewPage> {
                   },
                 ),
                 const SizedBox(height: 20,),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: <Widget>[
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.fromLTRB(10, 5, 10, 5),
+                        decoration: BoxDecoration(
+                          color: MyColor.primaryColor,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            Icon(
+                              LucideIcons.check,
+                              color: MyColor.backgroundColor,
+                              size: 12,
+                            ),
+                            const SizedBox(width: 5,),
+                            Expanded(
+                              child: Text(
+                                "Fully Paid",
+                                style: TextStyle(
+                                  color: MyColor.backgroundColor,
+                                  fontSize: 10,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                                textAlign: TextAlign.center,
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 20,),
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.fromLTRB(10, 5, 10, 5),
+                        decoration: BoxDecoration(
+                          color: MyColor.errorColor,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            Icon(
+                              LucideIcons.x,
+                              color: MyColor.backgroundColor,
+                              size: 12,
+                            ),
+                            const SizedBox(width: 5,),
+                            Expanded(
+                              child: Text(
+                                "Not Yet Paid",
+                                style: TextStyle(
+                                  color: MyColor.backgroundColor,
+                                  fontSize: 10,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                                textAlign: TextAlign.center,
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 20,),
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.fromLTRB(10, 5, 10, 5),
+                        decoration: BoxDecoration(
+                          color: MyColor.warningColor,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            Icon(
+                              LucideIcons.ungroup,
+                              color: MyColor.backgroundColor,
+                              size: 12,
+                            ),
+                            const SizedBox(width: 5,),
+                            Expanded(
+                              child: Text(
+                                "Partially Paid",
+                                style: TextStyle(
+                                  color: MyColor.backgroundColor,
+                                  fontSize: 10,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                                textAlign: TextAlign.center,
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20,),
                 const Center(
                   child: Text(
                     "Press on the calendar month to view detail.",
