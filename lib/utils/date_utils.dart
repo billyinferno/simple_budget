@@ -34,35 +34,39 @@ class MyDateUtils {
       firstDate: DateTime(DateTime.now().year - 5, 1),
       lastDate: DateTime(DateTime.now().year + 8, 12),
       initialDate: initialDate,
-      confirmWidget: Container(
-        padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
-        decoration: BoxDecoration(
-          color: MyColor.primaryColor,
-          borderRadius: BorderRadius.circular(5)
-        ),
-        child: const Text(
-          "Confirm",
-          style: TextStyle(
-            color: MyColor.backgroundColor,
-            fontWeight: FontWeight.bold,
+      monthPickerDialogSettings: MonthPickerDialogSettings(
+        actionBarSettings: PickerActionBarSettings(
+          confirmWidget: Container(
+            padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
+            decoration: BoxDecoration(
+              color: MyColor.primaryColor,
+              borderRadius: BorderRadius.circular(5)
+            ),
+            child: const Text(
+              "Confirm",
+              style: TextStyle(
+                color: MyColor.backgroundColor,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
-        ),
-      ),
-      cancelWidget: Container(
-        padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: MyColor.backgroundColorDark,
-            width: 1.0,
-            style: BorderStyle.solid,
-          ),
-          borderRadius: BorderRadius.circular(5)
-        ),
-        child: const Text(
-          "Cancel",
-          style: TextStyle(
-            color: MyColor.textColor,
-            fontWeight: FontWeight.bold,
+          cancelWidget: Container(
+            padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: MyColor.backgroundColorDark,
+                width: 1.0,
+                style: BorderStyle.solid,
+              ),
+              borderRadius: BorderRadius.circular(5)
+            ),
+            child: const Text(
+              "Cancel",
+              style: TextStyle(
+                color: MyColor.textColor,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
         ),
       ),
