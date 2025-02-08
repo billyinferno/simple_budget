@@ -56,6 +56,8 @@ class _PlanTransactionEditPageState extends State<PlanTransactionEditPage> {
     _selectedDate = _transaction!.date.toLocal();
     _amountController.text = "${_transaction!.amount}";
     _descriptionController.text = _transaction!.description;
+
+    //TODO: to protect if plan is read only
   }
 
   @override
