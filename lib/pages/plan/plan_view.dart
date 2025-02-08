@@ -383,56 +383,12 @@ class _PlanViewPageState extends State<PlanViewPage> {
               physics: AlwaysScrollableScrollPhysics(),
               itemCount: _planData.transactions!.length,
               itemBuilder: (context, index) {
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: <Widget>[
-                    Slidable(
-                      endActionPane: ActionPane(
-                        extentRatio: 0.4,
-                        motion: const ScrollMotion(),
-                        children: <Widget>[
-                          SlidableAction(
-                            onPressed: (context) async {
-                              // go to the edit plan page
-                              await context.push('/plan/$_planUid/transaction/${_planData.transactions![index].id}/edit', extra: _planData).then(<bool>(value) {
-                                if (value != null) {
-                                  // reload the plan data with the new plan data being edited
-                                  if (value) {
-                                    // get again the plan data
-                                    _getData = _getPlanData();
-                                  }
-                                }
-                              },);
-                            },
-                            icon: LucideIcons.pencil,
-                            backgroundColor: MyColor.primaryColorDark,
-                            foregroundColor: MyColor.backgroundColorDark,
-                            label: "Edit",
-                          ),
-                          SlidableAction(
-                            onPressed: (context) async {
-                              // show dialog confirmation whether user want to delete the
-                              // plan or not first
-                              await MyDialog.showConfirmation(
-                                context: context,
-                                text: "Do you want to delete this transaction?",
-                                okayColor: MyColor.errorColor,
-                                cancelColor: MyColor.backgroundColor,
-                              ).then((result) async {
-                                if (result ?? false) {
-                                  await _deleteTransaction(id: _planData.transactions![index].id, uid: _planUid);
-                                }
-                              },);
-                            },
-                            icon: LucideIcons.trash,
-                            backgroundColor: MyColor.errorColor,
-                            foregroundColor: MyColor.backgroundColorDark,
-                            label: "Del",
-                          ),
-                        ]
-                      ),
-                      child: Container(
+                if (_planData.readOnly) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: <Widget>[
+                      Container(
                         width: double.infinity,
                         padding: const EdgeInsets.all(5),
                         decoration: BoxDecoration(
@@ -504,10 +460,137 @@ class _PlanViewPageState extends State<PlanViewPage> {
                           ],
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 10,),
-                  ],
-                );
+                      const SizedBox(height: 10,),
+                    ],
+                  );
+                }
+                else {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: <Widget>[
+                      Slidable(
+                        endActionPane: ActionPane(
+                          extentRatio: 0.4,
+                          motion: const ScrollMotion(),
+                          children: <Widget>[
+                            SlidableAction(
+                              onPressed: (context) async {
+                                // go to the edit plan page
+                                await context.push('/plan/$_planUid/transaction/${_planData.transactions![index].id}/edit', extra: _planData).then(<bool>(value) {
+                                  if (value != null) {
+                                    // reload the plan data with the new plan data being edited
+                                    if (value) {
+                                      // get again the plan data
+                                      _getData = _getPlanData();
+                                    }
+                                  }
+                                },);
+                              },
+                              icon: LucideIcons.pencil,
+                              backgroundColor: MyColor.primaryColorDark,
+                              foregroundColor: MyColor.backgroundColorDark,
+                              label: "Edit",
+                            ),
+                            SlidableAction(
+                              onPressed: (context) async {
+                                // show dialog confirmation whether user want to delete the
+                                // plan or not first
+                                await MyDialog.showConfirmation(
+                                  context: context,
+                                  text: "Do you want to delete this transaction?",
+                                  okayColor: MyColor.errorColor,
+                                  cancelColor: MyColor.backgroundColor,
+                                ).then((result) async {
+                                  if (result ?? false) {
+                                    await _deleteTransaction(id: _planData.transactions![index].id, uid: _planUid);
+                                  }
+                                },);
+                              },
+                              icon: LucideIcons.trash,
+                              backgroundColor: MyColor.errorColor,
+                              foregroundColor: MyColor.backgroundColorDark,
+                              label: "Del",
+                            ),
+                          ]
+                        ),
+                        child: Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(5),
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: MyColor.primaryColorDark,
+                              width: 1.0,
+                              style: BorderStyle.solid,
+                            )
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: <Widget>[
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: <Widget>[
+                                  Row(
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: <Widget>[
+                                      Icon(
+                                        LucideIcons.calendar,
+                                        color: MyColor.primaryColor,
+                                        size: 15,
+                                      ),
+                                      const SizedBox(width: 10,),
+                                      Text(
+                                        Globals.dfddMMyyyy.format(_planData.transactions![index].date),
+                                        style: TextStyle(
+                                          color: MyColor.textColor,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  Row(
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: <Widget>[
+                                      Icon(
+                                        LucideIcons.dollar_sign,
+                                        color: MyColor.primaryColor,
+                                        size: 15,
+                                      ),
+                                      const SizedBox(width: 10,),
+                                      Text(
+                                        MyNumberUtils.formatCurrency(
+                                          amount: _planData.transactions![index].amount,
+                                          decimalNum: 2,
+                                          showDecimal: true,
+                                          shorten: false,
+                                        ),
+                                        style: TextStyle(
+                                          color: MyColor.textColor,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                              Visibility(
+                                visible: (_planData.transactions![index].description.isNotEmpty),
+                                child: Text(
+                                  _planData.transactions![index].description
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 10,),
+                    ],
+                  );
+                }
               },
             )
           ),
