@@ -330,49 +330,52 @@ class _PlanViewPageState extends State<PlanViewPage> {
                   text: "${MyNumberUtils.formatCurrencyWithNull(amount: _currentUsageAmount)}/${MyNumberUtils.formatCurrency(amount: _currentAmount)} ($_currentUsage%)",
                 ),
               ),
-              const SizedBox(width: 5,),
-              GestureDetector(
-                onTap: (() async {
-                  await context.push('/plan/$_planUid/transaction/add', extra: _planData).then(<bool>(value) {
-                    if (value != null) {
-                      // reload the plan data with the new plan data being edited
-                      if (value) {
-                        // get again the plan data
-                        _getData = _getPlanData();
+              (_planData.readOnly ? const SizedBox.shrink() : const SizedBox(width: 5,)),
+              (
+                _planData.readOnly ? const SizedBox.shrink() :
+                GestureDetector(
+                  onTap: (() async {
+                    await context.push('/plan/$_planUid/transaction/add', extra: _planData).then(<bool>(value) {
+                      if (value != null) {
+                        // reload the plan data with the new plan data being edited
+                        if (value) {
+                          // get again the plan data
+                          _getData = _getPlanData();
+                        }
                       }
-                    }
-                  },);
-                }),
-                child: Container(
-                  padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-                  width: 150,
-                  height: 25,
-                  decoration: BoxDecoration(
-                    color: MyColor.primaryColorDark,
-                    borderRadius: BorderRadius.circular(25),
+                    },);
+                  }),
+                  child: Container(
+                    padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+                    width: 150,
+                    height: 25,
+                    decoration: BoxDecoration(
+                      color: MyColor.primaryColorDark,
+                      borderRadius: BorderRadius.circular(25),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: <Widget>[
+                        Icon(
+                          LucideIcons.plus,
+                          size: 15,
+                          color: MyColor.backgroundColor,
+                        ),
+                        const SizedBox(height: 10,),
+                        Expanded(
+                          child: Text(
+                            "ADD TRANSACTION",
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: MyColor.backgroundColor,
+                            ),
+                          )
+                        ),
+                      ],
+                    ),
                   ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: <Widget>[
-                      Icon(
-                        LucideIcons.plus,
-                        size: 15,
-                        color: MyColor.backgroundColor,
-                      ),
-                      const SizedBox(height: 10,),
-                      Expanded(
-                        child: Text(
-                          "ADD TRANSACTION",
-                          style: TextStyle(
-                            fontSize: 10,
-                            color: MyColor.backgroundColor,
-                          ),
-                        )
-                      ),
-                    ],
-                  ),
-                ),
+                )
               ),
             ],
           ),
