@@ -66,13 +66,6 @@ class _RouterPageState extends State<RouterPage> with TickerProviderStateMixin {
           },
         ),
         GoRoute(
-          name: 'plan-edit',
-          path: '/plan/edit',
-          builder: (context, state) {
-            return PlanEditPage(plan: state.extra,);
-          },
-        ),
-        GoRoute(
           path: '/plan/:uid',
           builder: (context, state) {
             final String uid = (state.pathParameters["uid"] ?? '');
@@ -86,6 +79,87 @@ class _RouterPageState extends State<RouterPage> with TickerProviderStateMixin {
               return PlanViewPage(uid: uid,);
             }
           },
+          routes: <RouteBase>[
+            GoRoute(
+              name: 'plan-edit',
+              path: 'edit',
+              builder: (context, state) {
+                final String uid = (state.pathParameters["uid"] ?? '');
+                if (uid.isEmpty) {
+                  return const ErrorTemplatePage(
+                    title: "Plan UID Empty",
+                    message: "The Plan UID is empty, please ensure to check and input the correct UID for the plan."
+                  );
+                }
+                else {
+                  return PlanEditPage(
+                    uid: uid,
+                    plan: state.extra,
+                  );
+                }
+              },
+            ),
+            GoRoute(
+              name: 'plan-transaction',
+              path: 'transaction',
+              builder: (context, state) {
+                return const ErrorTemplatePage(
+                  title: "Invalid Route",
+                  message: "Invalid Route for the page, please access the page using the correct route."
+                ); 
+              },
+              routes: <RouteBase>[
+                GoRoute(
+                  name: 'plan-transaction-add',
+                  path: 'add',
+                  builder: (context, state) {
+                    final String uid = (state.pathParameters["uid"] ?? '');
+                    if (uid.isEmpty) {
+                      return const ErrorTemplatePage(
+                        title: "Plan UID Empty",
+                        message: "The Plan UID is empty, please ensure to check and input the correct UID for the plan."
+                      );
+                    }
+                    else {
+                      return PlanTransactionAddPage(
+                        uid: uid,
+                        plan: state.extra!,
+                      );
+                    }
+                  },
+                ),
+                GoRoute(
+                  name: 'plan-transaction-edit',
+                  path: ':id/edit',
+                  builder: (context, state) {
+                    final String id = (state.pathParameters["id"] ?? '');
+                    final String uid = (state.pathParameters["uid"] ?? '');
+                    if (uid.isEmpty) {
+                      return const ErrorTemplatePage(
+                        title: "Plan UID Empty",
+                        message: "The Plan UID is empty, please ensure to check and input the correct UID for the plan."
+                      );
+                    }
+                    else {
+                      if (id.isEmpty) {
+                        return const ErrorTemplatePage(
+                          title: "Transaction ID Empty",
+                          message: "The Transaction ID is empty, please ensure to access this page from the correct route."
+                        );
+                      }
+                      else {
+                        return PlanTransactionEditPage(
+                          id: id,
+                          uid: uid,
+                          plan: state.extra!,
+                        );
+                      }
+                    }
+                  },
+                ),
+              ]
+            ),
+          ],
         ),
       ],
       errorBuilder: (context, state) {

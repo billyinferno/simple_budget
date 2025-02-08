@@ -12,9 +12,11 @@ enum EditType {
 }
 
 class PlanEditPage extends StatefulWidget {
+  final Object uid;
   final Object? plan;
   const PlanEditPage({
     super.key,
+    required this.uid,
     required this.plan,
   });
 
@@ -30,6 +32,7 @@ class _PlanEditPageState extends State<PlanEditPage> {
   final TextEditingController _amountController = TextEditingController();
 
   late PlanModel _plan;
+  late String _uid;
   late String _planUid;
   late DateTime _startDate;
   late DateTime _endDate;
@@ -55,13 +58,21 @@ class _PlanEditPageState extends State<PlanEditPage> {
       _amountController.text = _plan.amount.toString();
 
       _planUid = _plan.uid;
-      _startDate = _plan.startDate;
-      _endDate = _plan.endDate;
+      // check and ensure the plan UID is the same as being passed
+      _uid = widget.uid as String;
+      if (_planUid != _uid) {
+        Log.warning(message: "🫗 invalid Plan UID");
+        context.go('/dashboard');
+      }
+      else {
+        _startDate = _plan.startDate;
+        _endDate = _plan.endDate;
 
-      // generate participants map, as we will need to knew the status we will
-      // need to do for each participants
-      for(ParticipationModel participant in _plan.participations) {
-        _participants[participant] = EditType.noChanges;
+        // generate participants map, as we will need to knew the status we will
+        // need to do for each participants
+        for(ParticipationModel participant in _plan.participations) {
+          _participants[participant] = EditType.noChanges;
+        }
       }
     }
 
@@ -87,8 +98,8 @@ class _PlanEditPageState extends State<PlanEditPage> {
         title: Center(child: Text("Edit Plan $_planUid"),),
         leading: IconButton(
           onPressed: () {
-            // go back to dashboard
-            context.go('/dashboard');
+            // go back to plan view page
+            context.pop();
           },
           icon: const Icon(
             LucideIcons.chevron_left,
@@ -387,7 +398,7 @@ class _PlanEditPageState extends State<PlanEditPage> {
                     ),
                   ],
                 ),
-              )
+              ),
             ],
           ),
         ),
@@ -494,7 +505,8 @@ class _PlanEditPageState extends State<PlanEditPage> {
 
           // go back to the dashboar
           if (mounted) {
-            context.go('/dashboard');
+            // return back the result to the plan view
+            context.pop(true);
           }
         }
         else {

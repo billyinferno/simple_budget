@@ -8,7 +8,9 @@ class Globals {
   static DateFormat dfMon = DateFormat('MMM');
   static DateFormat dfyy = DateFormat('yy');
   static DateFormat dfyyyyMMdd = DateFormat('yyyy-MM-dd');
+  static DateFormat dfddMMyyyy = DateFormat('dd-MM-yyyy');
   static DateFormat dfyyMon = DateFormat('yyyy-MMM');
+  static DateFormat dfMMMM = DateFormat('MMMM');
 
   // URL portion for the NetUtils
   static String apiURL = (dotenv.env['API_URL'] ?? 'http://192.168.1.176:1337');
@@ -28,4 +30,7 @@ class Globals {
   static String apiPlanGenerate = '$apiURL/api/plans/generate';
   static String apiContributionCreate = '$apiURL/api/contributions/add';
   static String apiContributionDelete = '$apiURL/api/contributions/delete';
+  static String apiTransactionsCreate = '$apiURL/api/transactions/add';
+  static String apiTransactionsUpdate = '$apiURL/api/transactions/update';
+  static String apiTransactionsDelete = '$apiURL/api/transactions/delete';
 }

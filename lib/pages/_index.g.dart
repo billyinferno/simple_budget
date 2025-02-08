@@ -11,6 +11,8 @@ export './plan/plan_add.dart';
 export './plan/plan_edit.dart';
 export './plan/plan_item.dart';
 export './plan/plan_view.dart';
+export './plan/transactions/plan_transaction_add.dart';
+export './plan/transactions/plan_transaction_edit.dart';
 
 export './dashboard.dart';
 export './login.dart';

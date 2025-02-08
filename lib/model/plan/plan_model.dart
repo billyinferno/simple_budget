@@ -24,6 +24,7 @@ class PlanModel {
     final String pin;
     final List<ParticipationModel> participations;
     final Map<String, List<ContributionModel>>? contributions;
+    final List<TransactionModel>? transactions;
 
     PlanModel({
         required this.uid,
@@ -36,6 +37,7 @@ class PlanModel {
         required this.pin,
         required this.participations,
         this.contributions,
+        this.transactions,
     });
 
     factory PlanModel.fromJson(Map<String, dynamic> json) => PlanModel(
@@ -49,6 +51,7 @@ class PlanModel {
         pin: json["pin"],
         participations: List<ParticipationModel>.from(json["participations"].map((x) => ParticipationModel.fromJson(x))),
         contributions: (json["contributions"] == null ? {} : Map.from(json["contributions"]).map((k, v) => MapEntry<String, List<ContributionModel>>(k, List<ContributionModel>.from(v.map((x) => ContributionModel.fromJson(x)))))),
+        transactions: (json["transactions"] == null ? [] : List<TransactionModel>.from(json["transactions"].map((x) => TransactionModel.fromJson(x)))),
     );
 
     Map<String, dynamic> toJson() => {
@@ -62,5 +65,6 @@ class PlanModel {
         "pin": pin,
         "participations": List<dynamic>.from(participations.map((x) => x.toJson())),
         "contributions": (contributions == null ? "{}" : Map.from(contributions!).map((k, v) => MapEntry<String, dynamic>(k, List<dynamic>.from(v.map((x) => x.toJson()))))),
+        "transactions": (transactions == null ? "[]" : List<dynamic>.from(transactions!.map((x) => x.toJson()))),
     };
 }

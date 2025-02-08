@@ -203,4 +203,62 @@ class PlanAPI {
 
     return retValue;
   }
+
+  static Future<bool> addTransaction({
+    required String uid,
+    required String description,
+    required DateTime date,
+    required double amount,
+  }) async {
+    bool retValue = false;
+
+    await NetUtils.post(
+      url: Globals.apiTransactionsCreate,
+      body: {
+        "uid": uid,
+        "description": description,
+        "date": Globals.dfyyyyMMdd.format(date),
+        "amount": amount,
+      },
+    ).then((value) {
+      retValue = true;
+    },);
+
+    return retValue;
+  }
+
+  static Future<bool> updateTransaction({
+    required int id,
+    required String uid,
+    required String description,
+    required DateTime date,
+    required double amount,
+  }) async {
+    bool retValue = false;
+
+    await NetUtils.post(
+      url: Globals.apiTransactionsUpdate,
+      body: {
+        "id": id,
+        "uid": uid,
+        "description": description,
+        "date": Globals.dfyyyyMMdd.format(date),
+        "amount": amount,
+      },
+    ).then((value) {
+      retValue = true;
+    },);
+
+    return retValue;
+  }
+
+  static Future<void> deleteTransaction({required String uid, required int id}) async {
+    await NetUtils.post(
+      url: Globals.apiTransactionsDelete,
+      body: {
+        "uid":uid,
+        "id":id,
+      },
+    );
+  }
 }
