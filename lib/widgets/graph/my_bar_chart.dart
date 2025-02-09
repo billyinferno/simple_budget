@@ -6,7 +6,9 @@ class MyBarChart extends StatelessWidget {
   final int value;
   final int maxValue;
   final List<Color>? colors;
-  final String? text;
+  final Color bgColor;
+  final Color fgColor;
+  final String text;
 
   const MyBarChart({
     super.key,
@@ -14,7 +16,9 @@ class MyBarChart extends StatelessWidget {
     required this.value,
     required this.maxValue,
     this.colors,
-    this.text,
+    this.bgColor = MyColor.backgroundColorDark,
+    this.fgColor = MyColor.textColor,
+    this.text = '',
   });
 
   @override
@@ -24,7 +28,7 @@ class MyBarChart extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(2),
       decoration: BoxDecoration(
-        color: MyColor.backgroundColorDark,
+        color: bgColor,
         borderRadius: BorderRadius.circular(20)
       ),
       child: Stack(
@@ -55,7 +59,12 @@ class MyBarChart extends StatelessWidget {
             ],
           ),
           Center(
-            child: Text((text ?? '')),
+            child: Text(
+              text,
+              style: TextStyle(
+                color: fgColor,
+              ),
+            ),
           ),
         ],
       ),
