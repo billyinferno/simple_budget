@@ -114,490 +114,456 @@ class _PlanViewPageState extends State<PlanViewPage> {
         leading: _leadingAppBar(),
         actions: _actionAppBar(),
       ),
-      body: RefreshIndicator(
-        color: MyColor.primaryColorDark,
-        onRefresh: () async {
-          setState(() {            
-            _getData = _getPlanData();
-          });
-        },
-        child: MyBody(
-          padding: const EdgeInsets.fromLTRB(10, 0, 10, 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: <Widget>[
-              const SizedBox(height: 10,),
-              Text(
-                "ID: $_planUid",
-                style: const TextStyle(
-                  color: MyColor.textColorSecondary
+      body: Container(
+        padding: const EdgeInsets.fromLTRB(10, 0, 10, 20),
+        child: RefreshIndicator(
+          color: MyColor.primaryColorDark,
+          onRefresh: () async {
+            setState(() {            
+              _getData = _getPlanData();
+            });
+          },
+          child: SingleChildScrollView(
+            controller: _scrollController,
+            physics: AlwaysScrollableScrollPhysics(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: <Widget>[
+                const SizedBox(height: 10,),
+                Text(
+                  "ID: $_planUid",
+                  style: const TextStyle(
+                    color: MyColor.textColorSecondary
+                  ),
                 ),
-              ),
-              Text(
-                (_planData.name).toUpperCase(),
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
+                Text(
+                  (_planData.name).toUpperCase(),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
-                overflow: TextOverflow.ellipsis,
-              ),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  MyIconLabel(icon: LucideIcons.user, text: "${_planData.participations.length}"),
-                  MyIconLabel(icon: LucideIcons.dollar_sign, text: "${MyNumberUtils.formatCurrencyWithNull(amount: _currentAmount)} ($_currentPercentage%)"),
-                  MyIconLabel(
-                    icon: LucideIcons.calendar,
-                    text: "${Globals.dfMMyy.format(_planData.startDate.toLocal())} - ${Globals.dfMMyy.format(_planData.endDate.toLocal())}",
-                    addPadding: false,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10,),
-              MyBarChart(
-                value: _currentPercentage,
-                maxValue: 100,
-                text: "${MyNumberUtils.formatCurrencyWithNull(amount: _currentAmount)}/${MyNumberUtils.formatCurrency(amount: _maxAmount)} ($_currentPercentage%)",
-              ),
-              const SizedBox(height: 10,),
-              Visibility(
-                visible: _planData.description.isNotEmpty,
-                child: Text(_planData.description)
-              ),
-              Visibility(
-                visible: _planData.description.isNotEmpty,
-                child: const SizedBox(height: 10,)
-              ),
-              MyMonthCalendar(
-                startDate: _planData.startDate,
-                endDate: _planData.endDate,
-                payment: _paymentData,
-                onTap: (date) async {
-                  await _showPlanModal(date: date);
-                },
-              ),
-              const SizedBox(height: 10,),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: <Widget>[
-                  Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.fromLTRB(10, 5, 10, 5),
-                      decoration: BoxDecoration(
-                        color: MyColor.primaryColor,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          Icon(
-                            LucideIcons.check,
-                            color: MyColor.backgroundColor,
-                            size: 12,
-                          ),
-                          const SizedBox(width: 5,),
-                          Expanded(
-                            child: Text(
-                              "Fully Paid",
-                              style: TextStyle(
-                                color: MyColor.backgroundColor,
-                                fontSize: 10,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                              textAlign: TextAlign.center,
-                            ),
-                          )
-                        ],
-                      ),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    MyIconLabel(icon: LucideIcons.user, text: "${_planData.participations.length}"),
+                    MyIconLabel(icon: LucideIcons.dollar_sign, text: "${MyNumberUtils.formatCurrencyWithNull(amount: _currentAmount)} ($_currentPercentage%)"),
+                    MyIconLabel(
+                      icon: LucideIcons.calendar,
+                      text: "${Globals.dfMMyy.format(_planData.startDate.toLocal())} - ${Globals.dfMMyy.format(_planData.endDate.toLocal())}",
+                      addPadding: false,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10,),
+                MyBarChart(
+                  value: _currentPercentage,
+                  maxValue: 100,
+                  text: "${MyNumberUtils.formatCurrencyWithNull(amount: _currentAmount)}/${MyNumberUtils.formatCurrency(amount: _maxAmount)} ($_currentPercentage%)",
+                ),
+                const SizedBox(height: 10,),
+                Visibility(
+                  visible: _planData.description.isNotEmpty,
+                  child: Text(_planData.description)
+                ),
+                Visibility(
+                  visible: _planData.description.isNotEmpty,
+                  child: const SizedBox(height: 10,)
+                ),
+                MyMonthCalendar(
+                  startDate: _planData.startDate,
+                  endDate: _planData.endDate,
+                  payment: _paymentData,
+                  onTap: (date) async {
+                    await _showPlanModal(date: date);
+                  },
+                ),
+                const SizedBox(height: 10,),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: <Widget>[
+                    _chip(
+                      icon: LucideIcons.check,
+                      bgColor: MyColor.primaryColor,
+                      fgColor: MyColor.backgroundColor,
+                      borderColor: MyColor.textColor,
+                      text: 'Fully Paid',
+                    ),
+                    const SizedBox(width: 10,),
+                    _chip(
+                      icon: LucideIcons.x,
+                      bgColor: MyColor.errorColor,
+                      fgColor: MyColor.backgroundColor,
+                      borderColor: MyColor.textColor,
+                      text: 'Not Yet Paid',
+                    ),
+                    const SizedBox(width: 10,),
+                    _chip(
+                      icon: LucideIcons.ungroup,
+                      bgColor: Colors.yellow[800]!,
+                      fgColor: MyColor.backgroundColor,
+                      borderColor: MyColor.textColor,
+                      text: 'Partially Paid',
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 5,),
+                const Center(
+                  child: Text(
+                    "Press on the calendar month to view detail.",
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontStyle: FontStyle.italic,
                     ),
                   ),
-                  const SizedBox(width: 20,),
-                  Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.fromLTRB(10, 5, 10, 5),
-                      decoration: BoxDecoration(
-                        color: MyColor.errorColor,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          Icon(
-                            LucideIcons.x,
-                            color: MyColor.backgroundColor,
-                            size: 12,
-                          ),
-                          const SizedBox(width: 5,),
-                          Expanded(
-                            child: Text(
-                              "Not Yet Paid",
-                              style: TextStyle(
-                                color: MyColor.backgroundColor,
-                                fontSize: 10,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                              textAlign: TextAlign.center,
-                            ),
-                          )
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 20,),
-                  Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.fromLTRB(10, 5, 10, 5),
-                      decoration: BoxDecoration(
-                        color: MyColor.warningColor,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          Icon(
-                            LucideIcons.ungroup,
-                            color: MyColor.backgroundColor,
-                            size: 12,
-                          ),
-                          const SizedBox(width: 5,),
-                          Expanded(
-                            child: Text(
-                              "Partially Paid",
-                              style: TextStyle(
-                                color: MyColor.backgroundColor,
-                                fontSize: 10,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                              textAlign: TextAlign.center,
-                            ),
-                          )
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 5,),
-              const Center(
-                child: Text(
-                  "Press on the calendar month to view detail.",
+                ),
+                const SizedBox(height: 5,),
+                Text(
+                  "TRANSACTION",
                   style: TextStyle(
                     fontSize: 12,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: <Widget>[
+                    Expanded(
+                      child: MyBarChart(
+                        value: _currentUsage,
+                        maxValue: 100,
+                        colors: [
+                          Colors.red[900]!,
+                          Colors.red[700]!,
+                          Colors.red[500]!,
+                        ],
+                        bgColor: MyColor.textColor,
+                        fgColor: MyColor.backgroundColor,
+                        text: "${MyNumberUtils.formatCurrencyWithNull(amount: _currentUsageAmount)}/${MyNumberUtils.formatCurrency(amount: _currentAmount)} (${MyNumberUtils.formatCurrencyWithNull(amount: (_currentAmount - _currentUsageAmount))}) ($_currentUsage%)",
+                      ),
+                    ),
+                    (_planData.readOnly ? const SizedBox.shrink() : const SizedBox(width: 5,)),
+                    (
+                      _planData.readOnly ? const SizedBox.shrink() :
+                      GestureDetector(
+                        onTap: (() async {
+                          await context.push('/plan/$_planUid/transaction/add', extra: _planData).then(<bool>(value) {
+                            if (value != null) {
+                              // reload the plan data with the new plan data being edited
+                              if (value) {
+                                // get again the plan data
+                                _getData = _getPlanData();
+                              }
+                            }
+                          },);
+                        }),
+                        child: Container(
+                          padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+                          width: 70,
+                          height: 25,
+                          decoration: BoxDecoration(
+                            color: MyColor.primaryColorDark,
+                            borderRadius: BorderRadius.circular(25),
+                          ),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: <Widget>[
+                              Icon(
+                                LucideIcons.plus,
+                                size: 15,
+                                color: MyColor.backgroundColor,
+                              ),
+                              const SizedBox(width: 5,),
+                              Text(
+                                "ADD",
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color: MyColor.backgroundColor,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 5,),
+                _transactionList(),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _chip({
+    Color bgColor = MyColor.primaryColor,
+    Color fgColor = MyColor.backgroundColor,
+    Color? borderColor,
+    required IconData icon,
+    required String text,
+  }) {
+    Border? border;
+    if (borderColor != null) {
+      border = Border.all(
+        color: borderColor,
+        width: 2.0,
+        style: BorderStyle.solid,
+      );
+    }
+
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(10, 5, 10, 5),
+        decoration: BoxDecoration(
+          color: bgColor,
+          borderRadius: BorderRadius.circular(20),
+          border: border,
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Icon(
+              icon,
+              color: fgColor,
+              size: 12,
+            ),
+            const SizedBox(width: 5,),
+            Expanded(
+              child: Text(
+                text,
+                style: TextStyle(
+                  color: fgColor,
+                  fontSize: 10,
+                ),
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 10,),
-              _transactionList(),
-            ],
-          )
+            )
+          ],
         ),
       ),
     );
   }
 
   Widget _transactionList() {
-    return Expanded(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: <Widget>[
-          Text(
-            "TRANSACTION",
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: <Widget>[
-              Expanded(
-                child: MyBarChart(
-                  value: _currentUsage,
-                  maxValue: 100,
-                  colors: [
-                    Colors.red[900]!,
-                    Colors.red[700]!,
-                    Colors.red[500]!,
-                  ],
-                  text: "${MyNumberUtils.formatCurrencyWithNull(amount: _currentUsageAmount)}/${MyNumberUtils.formatCurrency(amount: _currentAmount)} ($_currentUsage%)",
-                ),
-              ),
-              (_planData.readOnly ? const SizedBox.shrink() : const SizedBox(width: 5,)),
-              (
-                _planData.readOnly ? const SizedBox.shrink() :
-                GestureDetector(
-                  onTap: (() async {
-                    await context.push('/plan/$_planUid/transaction/add', extra: _planData).then(<bool>(value) {
-                      if (value != null) {
-                        // reload the plan data with the new plan data being edited
-                        if (value) {
-                          // get again the plan data
-                          _getData = _getPlanData();
-                        }
-                      }
-                    },);
-                  }),
-                  child: Container(
-                    padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-                    width: 150,
-                    height: 25,
-                    decoration: BoxDecoration(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: List<Widget>.generate(
+        _planData.transactions!.length, (index) {
+          if (_planData.readOnly) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: <Widget>[
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(5),
+                  decoration: BoxDecoration(
+                    border: Border.all(
                       color: MyColor.primaryColorDark,
-                      borderRadius: BorderRadius.circular(25),
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: <Widget>[
-                        Icon(
-                          LucideIcons.plus,
-                          size: 15,
-                          color: MyColor.backgroundColor,
-                        ),
-                        const SizedBox(height: 10,),
-                        Expanded(
-                          child: Text(
-                            "ADD TRANSACTION",
-                            style: TextStyle(
-                              fontSize: 10,
-                              color: MyColor.backgroundColor,
-                            ),
-                          )
-                        ),
-                      ],
-                    ),
+                      width: 1.0,
+                      style: BorderStyle.solid,
+                    )
                   ),
-                )
-              ),
-            ],
-          ),
-          const SizedBox(height: 5,),
-          Expanded(
-            child: ListView.builder(
-              controller: _transactionController,
-              physics: AlwaysScrollableScrollPhysics(),
-              itemCount: _planData.transactions!.length,
-              itemBuilder: (context, index) {
-                if (_planData.readOnly) {
-                  return Column(
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: <Widget>[
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(5),
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: MyColor.primaryColorDark,
-                            width: 1.0,
-                            style: BorderStyle.solid,
-                          )
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: <Widget>[
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: <Widget>[
-                                Row(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  children: <Widget>[
-                                    Icon(
-                                      LucideIcons.calendar,
-                                      color: MyColor.primaryColor,
-                                      size: 15,
-                                    ),
-                                    const SizedBox(width: 10,),
-                                    Text(
-                                      Globals.dfddMMyyyy.format(_planData.transactions![index].date),
-                                      style: TextStyle(
-                                        color: MyColor.textColor,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                Row(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  children: <Widget>[
-                                    Icon(
-                                      LucideIcons.dollar_sign,
-                                      color: MyColor.primaryColor,
-                                      size: 15,
-                                    ),
-                                    const SizedBox(width: 10,),
-                                    Text(
-                                      MyNumberUtils.formatCurrency(
-                                        amount: _planData.transactions![index].amount,
-                                        decimalNum: 2,
-                                        showDecimal: true,
-                                        shorten: false,
-                                      ),
-                                      style: TextStyle(
-                                        color: MyColor.textColor,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                            Visibility(
-                              visible: (_planData.transactions![index].description.isNotEmpty),
-                              child: Text(
-                                _planData.transactions![index].description
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 10,),
-                    ],
-                  );
-                }
-                else {
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: <Widget>[
-                      Slidable(
-                        endActionPane: ActionPane(
-                          extentRatio: 0.4,
-                          motion: const ScrollMotion(),
-                          children: <Widget>[
-                            SlidableAction(
-                              onPressed: (context) async {
-                                // go to the edit plan page
-                                await context.push('/plan/$_planUid/transaction/${_planData.transactions![index].id}/edit', extra: _planData).then(<bool>(value) {
-                                  if (value != null) {
-                                    // reload the plan data with the new plan data being edited
-                                    if (value) {
-                                      // get again the plan data
-                                      _getData = _getPlanData();
-                                    }
-                                  }
-                                },);
-                              },
-                              icon: LucideIcons.pencil,
-                              backgroundColor: MyColor.primaryColorDark,
-                              foregroundColor: MyColor.backgroundColorDark,
-                              label: "Edit",
-                            ),
-                            SlidableAction(
-                              onPressed: (context) async {
-                                // show dialog confirmation whether user want to delete the
-                                // plan or not first
-                                await MyDialog.showConfirmation(
-                                  context: context,
-                                  text: "Do you want to delete this transaction?",
-                                  okayColor: MyColor.errorColor,
-                                  cancelColor: MyColor.backgroundColor,
-                                ).then((result) async {
-                                  if (result ?? false) {
-                                    await _deleteTransaction(id: _planData.transactions![index].id, uid: _planUid);
-                                  }
-                                },);
-                              },
-                              icon: LucideIcons.trash,
-                              backgroundColor: MyColor.errorColor,
-                              foregroundColor: MyColor.backgroundColorDark,
-                              label: "Del",
-                            ),
-                          ]
-                        ),
-                        child: Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.all(5),
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: MyColor.primaryColorDark,
-                              width: 1.0,
-                              style: BorderStyle.solid,
-                            )
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: <Widget>[
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: <Widget>[
-                                  Row(
-                                    crossAxisAlignment: CrossAxisAlignment.center,
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: <Widget>[
-                                      Icon(
-                                        LucideIcons.calendar,
-                                        color: MyColor.primaryColor,
-                                        size: 15,
-                                      ),
-                                      const SizedBox(width: 10,),
-                                      Text(
-                                        Globals.dfddMMyyyy.format(_planData.transactions![index].date),
-                                        style: TextStyle(
-                                          color: MyColor.textColor,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  Row(
-                                    crossAxisAlignment: CrossAxisAlignment.center,
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: <Widget>[
-                                      Icon(
-                                        LucideIcons.dollar_sign,
-                                        color: MyColor.primaryColor,
-                                        size: 15,
-                                      ),
-                                      const SizedBox(width: 10,),
-                                      Text(
-                                        MyNumberUtils.formatCurrency(
-                                          amount: _planData.transactions![index].amount,
-                                          decimalNum: 2,
-                                          showDecimal: true,
-                                          shorten: false,
-                                        ),
-                                        style: TextStyle(
-                                          color: MyColor.textColor,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
+                              Icon(
+                                LucideIcons.calendar,
+                                color: MyColor.primaryColor,
+                                size: 15,
                               ),
-                              Visibility(
-                                visible: (_planData.transactions![index].description.isNotEmpty),
-                                child: Text(
-                                  _planData.transactions![index].description
+                              const SizedBox(width: 10,),
+                              Text(
+                                Globals.dfddMMyyyy.format(_planData.transactions![index].date),
+                                style: TextStyle(
+                                  color: MyColor.textColor,
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
                             ],
                           ),
-                        ),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: <Widget>[
+                              Icon(
+                                LucideIcons.dollar_sign,
+                                color: MyColor.primaryColor,
+                                size: 15,
+                              ),
+                              const SizedBox(width: 10,),
+                              Text(
+                                MyNumberUtils.formatCurrency(
+                                  amount: _planData.transactions![index].amount,
+                                  decimalNum: 2,
+                                  showDecimal: true,
+                                  shorten: false,
+                                ),
+                                style: TextStyle(
+                                  color: MyColor.textColor,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 10,),
+                      Text(
+                        _planData.transactions![index].description
+                      ),
                     ],
-                  );
-                }
-              },
-            )
-          ),
-        ],
+                  ),
+                ),
+                const SizedBox(height: 10,),
+              ],
+            );
+          }
+          else {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: <Widget>[
+                Slidable(
+                  endActionPane: ActionPane(
+                    extentRatio: 0.4,
+                    motion: const ScrollMotion(),
+                    children: <Widget>[
+                      SlidableAction(
+                        onPressed: (context) async {
+                          // go to the edit plan page
+                          await context.push('/plan/$_planUid/transaction/${_planData.transactions![index].id}/edit', extra: _planData).then(<bool>(value) {
+                            if (value != null) {
+                              // reload the plan data with the new plan data being edited
+                              if (value) {
+                                // get again the plan data
+                                _getData = _getPlanData();
+                              }
+                            }
+                          },);
+                        },
+                        icon: LucideIcons.pencil,
+                        backgroundColor: MyColor.primaryColorDark,
+                        foregroundColor: MyColor.backgroundColorDark,
+                        label: "Edit",
+                      ),
+                      SlidableAction(
+                        onPressed: (context) async {
+                          // show dialog confirmation whether user want to delete the
+                          // plan or not first
+                          await MyDialog.showConfirmation(
+                            context: context,
+                            text: "Do you want to delete this transaction?",
+                            okayColor: MyColor.errorColor,
+                            cancelColor: MyColor.backgroundColor,
+                          ).then((result) async {
+                            if (result ?? false) {
+                              await _deleteTransaction(id: _planData.transactions![index].id, uid: _planUid);
+                            }
+                          },);
+                        },
+                        icon: LucideIcons.trash,
+                        backgroundColor: MyColor.errorColor,
+                        foregroundColor: MyColor.backgroundColorDark,
+                        label: "Del",
+                      ),
+                    ]
+                  ),
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(5),
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: MyColor.primaryColorDark,
+                        width: 1.0,
+                        style: BorderStyle.solid,
+                      )
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: <Widget>[
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: <Widget>[
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: <Widget>[
+                                Icon(
+                                  LucideIcons.calendar,
+                                  color: MyColor.primaryColor,
+                                  size: 15,
+                                ),
+                                const SizedBox(width: 10,),
+                                Text(
+                                  Globals.dfddMMyyyy.format(_planData.transactions![index].date),
+                                  style: TextStyle(
+                                    color: MyColor.textColor,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: <Widget>[
+                                Icon(
+                                  LucideIcons.dollar_sign,
+                                  color: MyColor.primaryColor,
+                                  size: 15,
+                                ),
+                                const SizedBox(width: 10,),
+                                Text(
+                                  MyNumberUtils.formatCurrency(
+                                    amount: _planData.transactions![index].amount,
+                                    decimalNum: 2,
+                                    showDecimal: true,
+                                    shorten: false,
+                                  ),
+                                  style: TextStyle(
+                                    color: MyColor.textColor,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        Text(
+                          _planData.transactions![index].description
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 10,),
+              ],
+            );
+          }
+        },
       ),
     );
   }
