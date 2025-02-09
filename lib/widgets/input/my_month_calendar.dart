@@ -110,9 +110,9 @@ class MyMonthCalendar extends StatelessWidget {
       if (date.isAfter(DateTime.now())) {
         // check if got partial payment or not?
         if (paid == ContributionStatus.partial) {
-          currentIcon = const Icon(
+          currentIcon = Icon(
             LucideIcons.ungroup,
-            color: MyColor.warningColor,
+            color: Colors.yellow[800],
           );
         }
         else {
@@ -145,7 +145,7 @@ class MyMonthCalendar extends StatelessWidget {
           }
         }),
         child: Container(
-          height: 100,
+          height: 80,
           padding: const EdgeInsets.all(5),
           decoration: BoxDecoration(
             color: Colors.grey[900],
