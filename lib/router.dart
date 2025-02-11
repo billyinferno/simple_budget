@@ -121,10 +121,20 @@ class _RouterPageState extends State<RouterPage> with TickerProviderStateMixin {
                       );
                     }
                     else {
-                      return PlanTransactionAddPage(
-                        uid: uid,
-                        plan: state.extra!,
-                      );
+                      // check if the plan is not read only
+                      final PlanModel plan = state.extra! as PlanModel;
+                      if (plan.readOnly) {
+                        return const ErrorTemplatePage(
+                          title: "Unable access protected page",
+                          message: "Invalid credentials when trying to access protected page."
+                        );
+                      }
+                      else {
+                        return PlanTransactionAddPage(
+                          uid: uid,
+                          plan: state.extra!,
+                        );
+                      }
                     }
                   },
                 ),
@@ -148,11 +158,21 @@ class _RouterPageState extends State<RouterPage> with TickerProviderStateMixin {
                         );
                       }
                       else {
-                        return PlanTransactionEditPage(
-                          id: id,
-                          uid: uid,
-                          plan: state.extra!,
-                        );
+                        // check if the plan is not read only
+                        final PlanModel plan = state.extra! as PlanModel;
+                        if (plan.readOnly) {
+                          return const ErrorTemplatePage(
+                            title: "Unable access protected page",
+                            message: "Invalid credentials when trying to access protected page."
+                          );
+                        }
+                        else {
+                          return PlanTransactionEditPage(
+                            id: id,
+                            uid: uid,
+                            plan: state.extra!,
+                          );
+                        }
                       }
                     }
                   },
@@ -165,7 +185,7 @@ class _RouterPageState extends State<RouterPage> with TickerProviderStateMixin {
       errorBuilder: (context, state) {
         return ErrorTemplatePage(
           title: 'Page Not Found',
-          message: 'The "${state.uri}" page that you looking for is not found. Please us arrow to return back to the main page.',
+          message: 'The "${state.uri}" page that you looking for is not found. Please use arrow to return back to the main page.',
         );
       },
       redirect: (context, state) async {

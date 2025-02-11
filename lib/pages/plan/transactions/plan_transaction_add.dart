@@ -39,8 +39,6 @@ class _PlanTransactionAddPageState extends State<PlanTransactionAddPage> {
 
     // initialize variable
     _selectedDate = DateTime.now().toLocal();
-
-    //TODO: to protect if plan is read only
   }
 
   @override
