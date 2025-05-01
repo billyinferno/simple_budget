@@ -28,6 +28,8 @@ class _PlanTransactionAddPageState extends State<PlanTransactionAddPage> {
 
   late DateTime _selectedDate;
 
+  late TransactionType _transactionType;
+
   @override
   void initState() {
     super.initState();
@@ -36,6 +38,8 @@ class _PlanTransactionAddPageState extends State<PlanTransactionAddPage> {
     _planUid = widget.uid as String;
     // get the plan
     _plan = widget.plan as PlanModel;
+    // default the transaction type as expense
+    _transactionType = TransactionType.expense;
 
     // initialize variable
     _selectedDate = DateTime.now().toLocal();
@@ -108,6 +112,27 @@ class _PlanTransactionAddPageState extends State<PlanTransactionAddPage> {
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                 ),
+              ),
+              const SizedBox(height: 15,),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: <Widget>[
+                  const TextSmall(text: "Type"),
+                  const SizedBox(width: 10,),
+                  Expanded(
+                    child: CupertinoSlidingSegmentedControl<TransactionType>(
+                      children: _cupertinoSegmentChildren(),
+                      thumbColor: (_transactionType == TransactionType.expense ? MyColor.errorColor : MyColor.successColor),
+                      groupValue: _transactionType,
+                      onValueChanged: <TransactionType>(value) {
+                        setState(() {
+                          _transactionType = value;
+                        });
+                      },
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 15,),
               Row(
@@ -208,6 +233,31 @@ class _PlanTransactionAddPageState extends State<PlanTransactionAddPage> {
     );
   }
 
+  Map<TransactionType, Widget> _cupertinoSegmentChildren() {
+    return <TransactionType, Widget> {
+      TransactionType.expense: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 20),
+        child: Text(
+          'Expense',
+          style: TextStyle(
+            color: (_transactionType == TransactionType.expense ? MyColor.backgroundColor : MyColor.errorColor),
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+      TransactionType.income: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 20),
+        child: Text(
+          'Income',
+          style: TextStyle(
+            color: (_transactionType == TransactionType.income ? MyColor.backgroundColor : MyColor.successColor),
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+    };
+  }
+
   Future<void> _addTransaction() async {
     // validate all the data is already filled before we submit the create
     // first ensure the name is not empty
@@ -228,7 +278,7 @@ class _PlanTransactionAddPageState extends State<PlanTransactionAddPage> {
         ScaffoldMessenger.of(context).showSnackBar(
         createSnackBar(message: "Invalid amount number")
       );
-      return;
+        return;
       }
     }
 
@@ -243,6 +293,7 @@ class _PlanTransactionAddPageState extends State<PlanTransactionAddPage> {
         description: description,
         date: _selectedDate,
         amount: amount,
+        type: _transactionType,
       ).then((transaction) {
         if (transaction) {
           // success creating plan, put it on the log

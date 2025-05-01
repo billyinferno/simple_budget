@@ -31,6 +31,8 @@ class _PlanTransactionEditPageState extends State<PlanTransactionEditPage> {
 
   late DateTime _selectedDate;
 
+  late TransactionType _transactionType;
+
   @override
   void initState() {
     super.initState();
@@ -53,9 +55,12 @@ class _PlanTransactionEditPageState extends State<PlanTransactionEditPage> {
     }
 
     // initialize variable
-    _selectedDate = _transaction!.date.toLocal();
-    _amountController.text = "${_transaction!.amount}";
-    _descriptionController.text = _transaction!.description;
+    if (_transaction != null) {
+      _selectedDate = _transaction!.date.toLocal();
+      _amountController.text = "${_transaction!.amount}";
+      _descriptionController.text = _transaction!.description;
+      _transactionType = _transaction!.type;
+    }
   }
 
   @override
@@ -148,7 +153,28 @@ class _PlanTransactionEditPageState extends State<PlanTransactionEditPage> {
                   ),
                 ],
               ),
-              const SizedBox(height: 5,),
+              const SizedBox(height: 15,),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: <Widget>[
+                  const TextSmall(text: "Type"),
+                  const SizedBox(width: 10,),
+                  Expanded(
+                    child: CupertinoSlidingSegmentedControl<TransactionType>(
+                      children: _cupertinoSegmentChildren(),
+                      thumbColor: (_transactionType == TransactionType.expense ? MyColor.errorColor : MyColor.successColor),
+                      groupValue: _transactionType,
+                      onValueChanged: <TransactionType>(value) {
+                        setState(() {
+                          _transactionType = value;
+                        });
+                      },
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 15,),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.start,
@@ -247,6 +273,31 @@ class _PlanTransactionEditPageState extends State<PlanTransactionEditPage> {
     );
   }
 
+  Map<TransactionType, Widget> _cupertinoSegmentChildren() {
+    return <TransactionType, Widget> {
+      TransactionType.expense: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 20),
+        child: Text(
+          'Expense',
+          style: TextStyle(
+            color: (_transactionType == TransactionType.expense ? MyColor.backgroundColor : MyColor.errorColor),
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+      TransactionType.income: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 20),
+        child: Text(
+          'Income',
+          style: TextStyle(
+            color: (_transactionType == TransactionType.income ? MyColor.backgroundColor : MyColor.successColor),
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+    };
+  }
+
   Future<void> _updateTransaction() async {
     // validate all the data is already filled before we submit the create
     // first ensure the name is not empty
@@ -283,6 +334,7 @@ class _PlanTransactionEditPageState extends State<PlanTransactionEditPage> {
         description: description,
         date: _selectedDate,
         amount: amount,
+        type: _transactionType,
       ).then((transaction) {
         if (transaction) {
           // success creating plan, put it on the log

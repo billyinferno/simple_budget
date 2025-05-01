@@ -20,7 +20,6 @@ class PlanViewPage extends StatefulWidget {
 
 class _PlanViewPageState extends State<PlanViewPage> {
   final ScrollController _scrollController = ScrollController();
-  final ScrollController _transactionController = ScrollController();
 
   late String _planUid;
   late PlanModel _planData;
@@ -56,7 +55,6 @@ class _PlanViewPageState extends State<PlanViewPage> {
   @override
   void dispose() {
     _scrollController.dispose();
-    _transactionController.dispose();
     super.dispose();
   }
 
@@ -368,7 +366,6 @@ class _PlanViewPageState extends State<PlanViewPage> {
               children: <Widget>[
                 Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.all(5),
                   decoration: BoxDecoration(
                     border: Border.all(
                       color: MyColor.primaryColorDark,
@@ -376,63 +373,80 @@ class _PlanViewPageState extends State<PlanViewPage> {
                       style: BorderStyle.solid,
                     )
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: <Widget>[
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: <Widget>[
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: <Widget>[
-                              Icon(
-                                LucideIcons.calendar,
-                                color: MyColor.primaryColor,
-                                size: 15,
-                              ),
-                              const SizedBox(width: 10,),
-                              Text(
-                                Globals.dfddMMyyyy.format(_planData.transactions![index].date),
-                                style: TextStyle(
-                                  color: MyColor.textColor,
-                                  fontWeight: FontWeight.bold,
+                  child: IntrinsicHeight(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: <Widget>[
+                        Container(
+                          width: 10,
+                          color: (_planData.transactions![index].type == TransactionType.expense ? MyColor.errorColor : MyColor.successColor),
+                        ),
+                        Expanded(
+                          child: Container(
+                            padding: const EdgeInsets.all(5),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: <Widget>[
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: <Widget>[
+                                    Row(
+                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      children: <Widget>[
+                                        Icon(
+                                          LucideIcons.calendar,
+                                          color: MyColor.primaryColor,
+                                          size: 15,
+                                        ),
+                                        const SizedBox(width: 10,),
+                                        Text(
+                                          Globals.dfddMMyyyy.format(_planData.transactions![index].date),
+                                          style: TextStyle(
+                                            color: MyColor.textColor,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    Row(
+                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      children: <Widget>[
+                                        Icon(
+                                          LucideIcons.dollar_sign,
+                                          color: MyColor.primaryColor,
+                                          size: 15,
+                                        ),
+                                        const SizedBox(width: 10,),
+                                        Text(
+                                          MyNumberUtils.formatCurrency(
+                                            amount: _planData.transactions![index].amount,
+                                            decimalNum: 2,
+                                            showDecimal: true,
+                                            shorten: false,
+                                          ),
+                                          style: TextStyle(
+                                            color: MyColor.textColor,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
                                 ),
-                              ),
-                            ],
+                                Text(
+                                  _planData.transactions![index].description
+                                ),
+                              ],
+                            ),
                           ),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: <Widget>[
-                              Icon(
-                                LucideIcons.dollar_sign,
-                                color: MyColor.primaryColor,
-                                size: 15,
-                              ),
-                              const SizedBox(width: 10,),
-                              Text(
-                                MyNumberUtils.formatCurrency(
-                                  amount: _planData.transactions![index].amount,
-                                  decimalNum: 2,
-                                  showDecimal: true,
-                                  shorten: false,
-                                ),
-                                style: TextStyle(
-                                  color: MyColor.textColor,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                      Text(
-                        _planData.transactions![index].description
-                      ),
-                    ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
                 const SizedBox(height: 10,),
@@ -491,7 +505,6 @@ class _PlanViewPageState extends State<PlanViewPage> {
                   ),
                   child: Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.all(5),
                     decoration: BoxDecoration(
                       border: Border.all(
                         color: MyColor.primaryColorDark,
@@ -499,63 +512,80 @@ class _PlanViewPageState extends State<PlanViewPage> {
                         style: BorderStyle.solid,
                       )
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: <Widget>[
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: <Widget>[
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: <Widget>[
-                                Icon(
-                                  LucideIcons.calendar,
-                                  color: MyColor.primaryColor,
-                                  size: 15,
-                                ),
-                                const SizedBox(width: 10,),
-                                Text(
-                                  Globals.dfddMMyyyy.format(_planData.transactions![index].date),
-                                  style: TextStyle(
-                                    color: MyColor.textColor,
-                                    fontWeight: FontWeight.bold,
+                    child: IntrinsicHeight(
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: <Widget>[
+                          Container(
+                            width: 10,
+                            color: (_planData.transactions![index].type == TransactionType.expense ? MyColor.errorColor : MyColor.successColor),
+                          ),
+                          Expanded(
+                            child: Container(
+                              padding: const EdgeInsets.all(5),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: <Widget>[
+                                  Row(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: <Widget>[
+                                      Row(
+                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                        mainAxisAlignment: MainAxisAlignment.start,
+                                        children: <Widget>[
+                                          Icon(
+                                            LucideIcons.calendar,
+                                            color: MyColor.primaryColor,
+                                            size: 15,
+                                          ),
+                                          const SizedBox(width: 10,),
+                                          Text(
+                                            Globals.dfddMMyyyy.format(_planData.transactions![index].date),
+                                            style: TextStyle(
+                                              color: MyColor.textColor,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      Row(
+                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                        mainAxisAlignment: MainAxisAlignment.start,
+                                        children: <Widget>[
+                                          Icon(
+                                            LucideIcons.dollar_sign,
+                                            color: MyColor.primaryColor,
+                                            size: 15,
+                                          ),
+                                          const SizedBox(width: 10,),
+                                          Text(
+                                            MyNumberUtils.formatCurrency(
+                                              amount: _planData.transactions![index].amount,
+                                              decimalNum: 2,
+                                              showDecimal: true,
+                                              shorten: false,
+                                            ),
+                                            style: TextStyle(
+                                              color: MyColor.textColor,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
                                   ),
-                                ),
-                              ],
+                                  Text(
+                                    _planData.transactions![index].description
+                                  ),
+                                ],
+                              ),
                             ),
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: <Widget>[
-                                Icon(
-                                  LucideIcons.dollar_sign,
-                                  color: MyColor.primaryColor,
-                                  size: 15,
-                                ),
-                                const SizedBox(width: 10,),
-                                Text(
-                                  MyNumberUtils.formatCurrency(
-                                    amount: _planData.transactions![index].amount,
-                                    decimalNum: 2,
-                                    showDecimal: true,
-                                    shorten: false,
-                                  ),
-                                  style: TextStyle(
-                                    color: MyColor.textColor,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                        Text(
-                          _planData.transactions![index].description
-                        ),
-                      ],
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -874,7 +904,12 @@ class _PlanViewPageState extends State<PlanViewPage> {
       // calculate the current usage by loop thru all the transactions
       _currentUsageAmount = 0;
       for(TransactionModel transaction in _planData.transactions!) {
-        _currentUsageAmount += transaction.amount;
+        if (transaction.type == TransactionType.expense) {
+          _currentUsageAmount += transaction.amount;
+        }
+        else {
+          _currentUsageAmount -= transaction.amount;
+        }
       }
 
       // check if we have totalTransactionAmount or not?

@@ -12,6 +12,8 @@ export './widgets/_index.g.dart';
 export './storage/_index.g.dart';
 // PAGE
 export './pages/_index.g.dart';
+// TYPES
+export './types/_index.g.dart';
 
 // OTHER FILES
 export './globals.dart';

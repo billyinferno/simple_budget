@@ -209,6 +209,7 @@ class PlanAPI {
     required String description,
     required DateTime date,
     required double amount,
+    required TransactionType type,
   }) async {
     bool retValue = false;
 
@@ -219,6 +220,7 @@ class PlanAPI {
         "description": description,
         "date": Globals.dfyyyyMMdd.format(date),
         "amount": amount,
+        "type": type.name,
       },
     ).then((value) {
       retValue = true;
@@ -233,6 +235,7 @@ class PlanAPI {
     required String description,
     required DateTime date,
     required double amount,
+    required TransactionType type,
   }) async {
     bool retValue = false;
 
@@ -244,6 +247,7 @@ class PlanAPI {
         "description": description,
         "date": Globals.dfyyyyMMdd.format(date),
         "amount": amount,
+        "type": type.name,
       },
     ).then((value) {
       retValue = true;
