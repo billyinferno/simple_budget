@@ -250,7 +250,7 @@ class _PlanViewPageState extends State<PlanViewPage> {
                       _planData.readOnly ? const SizedBox.shrink() :
                       GestureDetector(
                         onTap: (() async {
-                          await context.push('/plan/$_planUid/transaction/add', extra: _planData).then(<bool>(value) {
+                          await context.push<bool>('/plan/$_planUid/transaction/add', extra: _planData).then((value) {
                             if (value != null) {
                               // reload the plan data with the new plan data being edited
                               if (value) {
@@ -466,7 +466,7 @@ class _PlanViewPageState extends State<PlanViewPage> {
                       SlidableAction(
                         onPressed: (context) async {
                           // go to the edit plan page
-                          await context.push('/plan/$_planUid/transaction/${_planData.transactions![index].id}/edit', extra: _planData).then(<bool>(value) {
+                          await context.push<bool>('/plan/$_planUid/transaction/${_planData.transactions![index].id}/edit', extra: _planData).then((value) {
                             if (value != null) {
                               // reload the plan data with the new plan data being edited
                               if (value) {
@@ -645,7 +645,7 @@ class _PlanViewPageState extends State<PlanViewPage> {
       ret.add(
         IconButton(
           onPressed: () async {
-            await context.push('/plan/$_planUid/edit', extra: _planData).then(<bool>(value) {
+            await context.push<bool>('/plan/$_planUid/edit', extra: _planData).then((value) {
               if (value != null) {
                 // reload the plan data with the new plan data being edited
                 if (value) {
