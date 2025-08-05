@@ -36,6 +36,9 @@ class _LoginFormPageState extends State<LoginFormPage> {
           ),
           cursorColor: MyColor.primaryColorDark,
           textAlign: TextAlign.center,
+          style: TextStyle(
+            color: MyColor.primaryColorDark,
+          ),
         ),
         const SizedBox(height: 5,),
         const Text(
@@ -54,6 +57,9 @@ class _LoginFormPageState extends State<LoginFormPage> {
           cursorColor: MyColor.primaryColorDark,
           obscureText: true,
           textAlign: TextAlign.center,
+          style: TextStyle(
+            color: MyColor.primaryColorDark,
+          ),
         ),
         const Expanded(child: SizedBox(),),
         MyButton(
